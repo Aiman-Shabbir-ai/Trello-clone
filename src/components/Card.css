@@ -1,0 +1,123 @@
+.task-card {
+  background: #ffffff;
+  border: 1px solid #e6edf5;
+  border-radius: 12px;
+  padding: 0.72rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 1px 1px rgba(15, 23, 42, 0.02),
+    0 2px 6px rgba(15, 23, 42, 0.03);
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease;
+  cursor: grab;
+  min-height: 152px;
+}
+
+.task-card:hover {
+  transform: translateY(-1px);
+  border-color: #dce6f2;
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.05),
+    0 8px 16px rgba(15, 23, 42, 0.06);
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+.task-card:focus-visible {
+  outline: none;
+  border-color: #8fb1df;
+  box-shadow:
+    0 0 0 3px rgba(59, 130, 246, 0.18),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.drag-affordance {
+  height: 4px;
+  width: 42px;
+  border-radius: 999px;
+  background: #e8eef7;
+  margin-bottom: 0.55rem;
+  transition: background-color 140ms ease;
+}
+
+.task-card:hover .drag-affordance,
+.task-card:focus-visible .drag-affordance {
+  background: #d8e2f1;
+}
+
+.tag-row {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.55rem;
+}
+
+.task-card h3 {
+  margin: 0;
+  font-size: 0.79rem;
+  color: #1f2937;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.task-card p {
+  margin: 0.35rem 0 0;
+  color: #7b8797;
+  line-height: 1.4;
+  font-size: 0.69rem;
+}
+
+.card-footer {
+  margin-top: auto;
+  padding-top: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #9aa7b8;
+  font-size: 0.67rem;
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.meta-alert {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.progress-pill {
+  border-radius: 999px;
+  padding: 0.12rem 0.38rem;
+  border: 1px solid #d6deea;
+  color: #64748b;
+}
+
+.progress-done {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #15803d;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-card,
+  .drag-affordance {
+    transition: none;
+  }
+}

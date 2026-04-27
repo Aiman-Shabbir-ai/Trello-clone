@@ -1,0 +1,168 @@
+.card-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(1px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.card-modal {
+  width: min(560px, 100%);
+  background: #ffffff;
+  border: 1px solid #dbe5f2;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow:
+    0 12px 24px rgba(15, 23, 42, 0.15),
+    0 2px 8px rgba(15, 23, 42, 0.08);
+}
+
+.card-modal-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+.card-modal-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.card-modal-header p {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.card-modal-header button {
+  border: 1px solid transparent;
+  background: transparent;
+  color: #64748b;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.card-modal-header button:hover {
+  border-color: #d6e0ee;
+  background: #f8fafc;
+}
+
+.card-modal-tags {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.card-modal-description {
+  margin: 0 0 0.85rem;
+  color: #475569;
+  line-height: 1.5;
+  font-size: 0.86rem;
+}
+
+.card-modal-meta {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.card-modal-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+}
+
+.card-modal-meta .meta-comments-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border: 1px solid #d8e3f2;
+  background: #f8fbff;
+  color: #51637a;
+  border-radius: 999px;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.card-modal-meta .meta-comments-btn:hover {
+  border-color: #bed0e8;
+  background: #eef5ff;
+}
+
+.card-modal-meta .done {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.card-modal-assignees {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  border-top: 1px solid #e7edf6;
+  padding-top: 0.75rem;
+}
+
+.card-modal-assignees h3 {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.card-modal-comments {
+  margin-top: 0.9rem;
+  border-top: 1px solid #e7edf6;
+  padding-top: 0.75rem;
+}
+
+.card-modal-comments h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.card-modal-comments ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.card-modal-comments li {
+  border: 1px solid #dce6f3;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  background: #f8fafc;
+}
+
+.card-modal-comments li p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #334155;
+}
+
+.card-modal-comments li span {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-size: 0.68rem;
+  color: #64748b;
+}
+
+.card-modal-comments .empty-comments {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #64748b;
+}

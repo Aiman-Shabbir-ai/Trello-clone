@@ -1,0 +1,6 @@
+.app-shell {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  background-image: radial-gradient(circle, #e7edf5 1px, transparent 1px);
+  background-size: 18px 18px;
+}

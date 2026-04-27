@@ -1,0 +1,172 @@
+.column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  min-height: 22px;
+}
+
+.column-title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.column-header h2 {
+  margin: 0;
+  font-size: 0.74rem;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.count {
+  color: #8a98ab;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.column-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.column-actions button {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  color: #9dabc0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.column-actions button:hover {
+  border-color: #e7edf5;
+  background: #ffffff;
+  color: #73849b;
+}
+
+.column-actions button:focus-visible {
+  outline: none;
+  border-color: #8fb1df;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
+.column-cards {
+  display: grid;
+  gap: 0.7rem;
+  align-content: start;
+}
+
+.add-card-btn {
+  margin-top: 0.55rem;
+  width: 100%;
+  border: 1px solid #e0e8f4;
+  border-radius: 10px;
+  background: #f9fbfe;
+  color: #8b99ac;
+  font-size: 0.74rem;
+  padding: 0.5rem 0.6rem;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    background-color 120ms ease;
+}
+
+.add-card-btn:hover {
+  border-color: #cfdaea;
+  color: #6f8096;
+  background: #ffffff;
+}
+
+.add-card-btn:focus-visible {
+  outline: none;
+  border-color: #8fb1df;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
+.card-composer {
+  margin-top: 0.55rem;
+  border: 1px solid #dce6f3;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.55rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.card-composer input,
+.card-composer textarea {
+  width: 100%;
+  border: 1px solid #d9e3f1;
+  border-radius: 8px;
+  padding: 0.45rem 0.5rem;
+  font: inherit;
+  font-size: 0.74rem;
+  color: #1f2937;
+  background: #f9fbfe;
+}
+
+.card-composer textarea {
+  resize: vertical;
+}
+
+.card-composer input:focus-visible,
+.card-composer textarea:focus-visible {
+  outline: none;
+  border-color: #8fb1df;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+  background: #ffffff;
+}
+
+.card-composer-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.composer-submit-btn,
+.composer-cancel-btn {
+  border-radius: 8px;
+  padding: 0.4rem 0.62rem;
+  font-size: 0.72rem;
+  border: 1px solid #d4deec;
+  cursor: pointer;
+}
+
+.composer-submit-btn {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.composer-submit-btn:hover {
+  background: #1e40af;
+  border-color: #1e40af;
+}
+
+.composer-cancel-btn {
+  background: #ffffff;
+  color: #64748b;
+}
+
+.composer-cancel-btn:hover {
+  background: #f8fafc;
+}
+
