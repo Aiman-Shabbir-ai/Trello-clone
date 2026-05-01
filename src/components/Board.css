@@ -12,6 +12,20 @@
   flex: 1 0 272px;
 }
 
+.search-empty-state {
+  flex: 1 1 100%;
+  border: 1px dashed #cdd9e8;
+  background: #f8fbff;
+  color: #5b6b7f;
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font-size: 0.82rem;
+}
+
+.search-empty-state strong {
+  color: #1f2937;
+}
+
 .board-content::-webkit-scrollbar {
   height: 10px;
 }

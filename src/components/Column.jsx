@@ -1,13 +1,9 @@
-import { useState } from 'react'
 import { Card } from './Card'
 import { Ellipsis, Plus } from 'lucide-react'
 import './Column.css'
 
 export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
   const completedCards = column.cards.filter((card) => card.done).length
-  const [isAddingCard, setIsAddingCard] = useState(false)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
 
   const handleDragOver = (event) => {
     event.preventDefault()
@@ -20,25 +16,6 @@ export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
     onMoveCard(cardId, sourceColumnId, column.id)
   }
 
-  const openComposer = () => {
-    setIsAddingCard(true)
-  }
-
-  const closeComposer = () => {
-    setIsAddingCard(false)
-    setTitle('')
-    setDescription('')
-  }
-
-  const handleAddCard = (event) => {
-    event.preventDefault()
-    if (!title.trim()) {
-      return
-    }
-    onAddCard(column.id, { title, description })
-    closeComposer()
-  }
-
   return (
     <section className="column">
       <div className="column-header">
@@ -49,7 +26,7 @@ export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
           </span>
         </div>
         <div className="column-actions">
-          <button type="button" aria-label="Add card" onClick={openComposer}>
+          <button type="button" aria-label="Add card" onClick={() => onAddCard(column.id)}>
             <Plus size={14} />
           </button>
           <button aria-label="More options">
@@ -69,36 +46,9 @@ export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
         ))}
       </div>
 
-      {isAddingCard ? (
-        <form className="card-composer" onSubmit={handleAddCard}>
-          <input
-            type="text"
-            placeholder="Card title"
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            autoFocus
-            required
-          />
-          <textarea
-            rows={3}
-            placeholder="Description (optional)"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-          <div className="card-composer-actions">
-            <button type="submit" className="composer-submit-btn">
-              Add card
-            </button>
-            <button type="button" className="composer-cancel-btn" onClick={closeComposer}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      ) : (
-        <button type="button" className="add-card-btn" onClick={openComposer}>
-          + Add a card
-        </button>
-      )}
+      <button type="button" className="add-card-btn" onClick={() => onAddCard(column.id)}>
+        + Add a card
+      </button>
     </section>
   )
 }

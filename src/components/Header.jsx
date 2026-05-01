@@ -7,7 +7,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react'
 
-export function Header() {
+export function Header({ searchQuery, onSearchChange }) {
   return (
     <header className="board-header">
       <div className="header-left">
@@ -17,7 +17,13 @@ export function Header() {
         </div>
         <div className="search-box">
           <Search size={14} className="icon" />
-          <input type="text" placeholder="Search tasks, members..." />
+          <input
+            type="text"
+            placeholder="Search tasks, members..."
+            value={searchQuery}
+            onChange={(event) => onSearchChange(event.target.value)}
+            aria-label="Search tasks and members"
+          />
         </div>
         <button className="btn btn-ghost">
           <SlidersHorizontal size={13} />

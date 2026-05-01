@@ -1,168 +1,295 @@
 .card-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(1px);
+  background: rgba(15, 23, 42, 0.25);
   display: grid;
   place-items: center;
-  padding: 1rem;
+  padding: 0.8rem;
   z-index: 1000;
 }
 
 .card-modal {
-  width: min(560px, 100%);
+  width: min(760px, 100%);
   background: #ffffff;
-  border: 1px solid #dbe5f2;
-  border-radius: 14px;
-  padding: 1rem;
-  box-shadow:
-    0 12px 24px rgba(15, 23, 42, 0.15),
-    0 2px 8px rgba(15, 23, 42, 0.08);
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.15);
+  overflow: hidden;
 }
 
 .card-modal-header {
   display: flex;
   justify-content: space-between;
   gap: 0.8rem;
-  margin-bottom: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-bottom: 1px solid #e6ecf4;
+}
+
+.card-modal-header-main {
+  display: grid;
+  gap: 0.45rem;
 }
 
 .card-modal-header h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #0f172a;
 }
 
-.card-modal-header p {
-  margin: 0.2rem 0 0;
-  font-size: 0.75rem;
-  color: #64748b;
-}
-
 .card-modal-header button {
-  border: 1px solid transparent;
+  border: 0;
   background: transparent;
-  color: #64748b;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
+  color: #94a3b8;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
 }
 
-.card-modal-header button:hover {
-  border-color: #d6e0ee;
-  background: #f8fafc;
+.card-modal-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 225px;
+}
+
+.card-modal-main-panel {
+  padding: 0.8rem 0.9rem;
+  border-right: 1px solid #e6ecf4;
+  display: grid;
+  gap: 0.7rem;
 }
 
 .card-modal-tags {
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
-  margin-bottom: 0.8rem;
 }
 
-.card-modal-description {
-  margin: 0 0 0.85rem;
-  color: #475569;
-  line-height: 1.5;
-  font-size: 0.86rem;
-}
-
-.card-modal-meta {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  color: #64748b;
-  font-size: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.card-modal-meta span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
-}
-
-.card-modal-meta .meta-comments-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.28rem;
-  border: 1px solid #d8e3f2;
-  background: #f8fbff;
-  color: #51637a;
-  border-radius: 999px;
-  padding: 0.15rem 0.5rem;
-  font-size: 0.72rem;
-  cursor: pointer;
-}
-
-.card-modal-meta .meta-comments-btn:hover {
-  border-color: #bed0e8;
-  background: #eef5ff;
-}
-
-.card-modal-meta .done {
-  color: #15803d;
-  font-weight: 600;
-}
-
-.card-modal-assignees {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.65rem;
-  border-top: 1px solid #e7edf6;
-  padding-top: 0.75rem;
-}
-
-.card-modal-assignees h3 {
+.detail-block h3,
+.side-block h3 {
   margin: 0;
   font-size: 0.8rem;
   color: #334155;
 }
 
-.card-modal-comments {
-  margin-top: 0.9rem;
-  border-top: 1px solid #e7edf6;
-  padding-top: 0.75rem;
+.detail-block {
+  display: grid;
+  gap: 0.55rem;
 }
 
-.card-modal-comments h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.8rem;
-  color: #334155;
+.card-modal-description {
+  margin: 0;
+  color: #475569;
+  line-height: 1.45;
+  font-size: 0.76rem;
+  border: 1px solid #dde6f1;
+  border-left: 4px solid #5b5cf8;
+  border-radius: 8px;
+  padding: 0.48rem 0.58rem;
+  background: #f9fbff;
 }
 
-.card-modal-comments ul {
+.checklist-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.checklist-header span {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.progress-box {
+  border: 1px solid #dde6f1;
+  border-radius: 10px;
+  padding: 0.48rem 0.55rem;
+  background: #f9fbff;
+}
+
+.progress-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-bottom: 0.42rem;
+}
+
+.progress-head strong {
+  color: #5b5cf8;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  background: #5b5cf8;
+}
+
+.checklist-items {
   margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
+  gap: 0.3rem;
+}
+
+.checklist-items li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.checklist-items input {
+  width: 13px;
+  height: 13px;
+  accent-color: #3b82f6;
+}
+
+.checklist-items span {
+  color: #334155;
+  font-size: 0.72rem;
+}
+
+.checklist-items span.checked {
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.attachment-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.attachment-item {
+  border: 1px solid #dde6f1;
+  border-radius: 10px;
+  background: #f8fafd;
+  padding: 0.42rem 0.5rem;
+  display: flex;
   gap: 0.45rem;
+  align-items: center;
 }
 
-.card-modal-comments li {
-  border: 1px solid #dce6f3;
+.attachment-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
   border-radius: 8px;
-  padding: 0.45rem 0.55rem;
-  background: #f8fafc;
 }
 
-.card-modal-comments li p {
-  margin: 0;
-  font-size: 0.76rem;
+.attachment-icon.red {
+  color: #ef4444;
+  background: #fee2e2;
+}
+
+.attachment-icon.blue {
+  color: #3b82f6;
+  background: #dbeafe;
+}
+
+.attachment-item strong {
+  display: block;
+  font-size: 0.69rem;
+  color: #1e293b;
+}
+
+.attachment-item small {
+  color: #64748b;
+  font-size: 0.62rem;
+}
+
+.card-modal-side-panel {
+  padding: 0.8rem 0.75rem;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+}
+
+.side-block {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.side-action {
+  border: 0;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.72rem;
+  text-align: left;
+  padding: 0.15rem 0;
+}
+
+.side-action.danger {
+  color: #dc2626;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.member-row img {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.member-row span {
+  font-size: 0.72rem;
   color: #334155;
 }
 
-.card-modal-comments li span {
-  display: inline-block;
-  margin-top: 0.2rem;
-  font-size: 0.68rem;
-  color: #64748b;
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: #4f46e5;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  font-size: 0.7rem;
 }
 
-.card-modal-comments .empty-comments {
+.due-box {
+  border: 1px solid #dde6f1;
+  border-radius: 10px;
+  padding: 0.4rem 0.5rem;
+  background: #f8fafd;
+}
+
+.due-box p {
   margin: 0;
-  font-size: 0.75rem;
-  color: #64748b;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.due-box small {
+  color: #94a3b8;
+  font-size: 0.66rem;
+}
+
+.due-box.overdue {
+  background: #fff1f2;
+  border-color: #fecdd3;
+}
+
+.due-box.overdue p,
+.due-box.overdue small {
+  color: #dc2626;
 }
