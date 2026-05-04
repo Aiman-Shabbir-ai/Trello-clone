@@ -12,6 +12,89 @@
   flex: 1 0 272px;
 }
 
+.add-list-column {
+  flex: 0 0 272px;
+  align-self: flex-start;
+}
+
+.add-list-trigger {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.55);
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.add-list-trigger:hover {
+  background: rgba(255, 255, 255, 0.85);
+  color: #334155;
+}
+
+.add-list-form {
+  display: grid;
+  gap: 0.45rem;
+  background: #ffffff;
+  border: 1px solid #dce6f3;
+  border-radius: 12px;
+  padding: 0.55rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.add-list-form input {
+  width: 100%;
+  border: 1px solid #d9e3f1;
+  border-radius: 8px;
+  padding: 0.45rem 0.5rem;
+  font: inherit;
+  font-size: 0.74rem;
+  color: #1f2937;
+  background: #f9fbfe;
+}
+
+.add-list-form input:focus-visible {
+  outline: none;
+  border-color: #8fb1df;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+  background: #ffffff;
+}
+
+.add-list-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.add-list-submit {
+  border: 0;
+  border-radius: 8px;
+  padding: 0.38rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #5b5cf8;
+  color: #ffffff;
+}
+
+.add-list-submit:hover {
+  background: #4f46e5;
+}
+
+.add-list-cancel {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
 .search-empty-state {
   flex: 1 1 100%;
   border: 1px dashed #cdd9e8;

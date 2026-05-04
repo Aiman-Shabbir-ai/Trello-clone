@@ -1,4 +1,5 @@
 export const boardData = {
+  boardTitle: 'Product roadmap',
   columns: [
     {
       id: 'backlog',
@@ -9,8 +10,7 @@ export const boardData = {
           title: 'User Interviews',
           description: 'Conduct six discovery interviews with five potential target users.',
           tags: [{ label: 'RESEARCH', tone: 'green' }],
-          date: 'Oct 28',
-          comments: 5,
+          dueDate: '2026-10-28',
           commentList: [
             {
               id: 'ui-c1',
@@ -45,7 +45,13 @@ export const boardData = {
               avatar: 'https://i.pravatar.cc/40?img=12',
             },
           ],
-          progress: '0/5',
+          checklist: [
+            { id: 'ui-t1', text: 'Recruit participants', completed: true },
+            { id: 'ui-t2', text: 'Finalize interview script', completed: false },
+            { id: 'ui-t3', text: 'Run six sessions', completed: false },
+            { id: 'ui-t4', text: 'Synthesize findings', completed: false },
+            { id: 'ui-t5', text: 'Share readout with stakeholders', completed: false },
+          ],
         },
         {
           id: 'competitor-analysis',
@@ -55,8 +61,7 @@ export const boardData = {
             { label: 'RESEARCH', tone: 'green' },
             { label: 'DESIGN', tone: 'purple' },
           ],
-          date: 'Oct 25',
-          comments: 3,
+          dueDate: '2026-10-25',
           commentList: [
             {
               id: 'ca-c1',
@@ -86,7 +91,11 @@ export const boardData = {
               avatar: 'https://i.pravatar.cc/40?img=31',
             },
           ],
-          progress: '0/3',
+          checklist: [
+            { id: 'ca-t1', text: 'Capture pricing & plans', completed: true },
+            { id: 'ca-t2', text: 'Document feature matrix', completed: true },
+            { id: 'ca-t3', text: 'Publish summary deck', completed: false },
+          ],
         },
       ],
     },
@@ -102,8 +111,7 @@ export const boardData = {
             { label: 'URGENT', tone: 'red' },
             { label: 'DEVELOPMENT', tone: 'blue' },
           ],
-          date: 'Oct 22',
-          comments: 5,
+          dueDate: '2026-05-01',
           commentList: [
             {
               id: 'db-c1',
@@ -131,7 +139,6 @@ export const boardData = {
               text: 'Migration draft is in progress; I will share after QA sanity checks.',
             },
           ],
-          alert: true,
           assignees: [
             {
               id: 'tina',
@@ -139,15 +146,20 @@ export const boardData = {
               avatar: 'https://i.pravatar.cc/40?img=5',
             },
           ],
-          progress: '2/5',
+          checklist: [
+            { id: 'db-t1', text: 'Model core entities', completed: true },
+            { id: 'db-t2', text: 'Define indexes & constraints', completed: true },
+            { id: 'db-t3', text: 'Draft migrations', completed: false },
+            { id: 'db-t4', text: 'Review with platform', completed: false },
+            { id: 'db-t5', text: 'Sign off ERD', completed: false },
+          ],
         },
         {
           id: 'wireframes-v1',
           title: 'Wireframes V1',
           description: 'Create low-fidelity wireframes for dashboard and task detail views.',
           tags: [{ label: 'DESIGN', tone: 'purple' }],
-          date: 'Oct 25',
-          comments: 3,
+          dueDate: '2026-10-25',
           commentList: [
             {
               id: 'wf-c1',
@@ -182,7 +194,10 @@ export const boardData = {
               avatar: 'https://i.pravatar.cc/40?img=47',
             },
           ],
-          progress: '1/2',
+          checklist: [
+            { id: 'wf-t1', text: 'Dashboard frames', completed: true },
+            { id: 'wf-t2', text: 'Card detail + modals', completed: false },
+          ],
         },
       ],
     },
@@ -195,8 +210,7 @@ export const boardData = {
           title: 'API Authentication',
           description: 'Implement JWT-based authentication for the mobile app endpoints.',
           tags: [{ label: 'DEVELOPMENT', tone: 'blue' }],
-          date: 'Oct 24',
-          comments: 5,
+          dueDate: '2026-10-24',
           commentList: [
             {
               id: 'api-c1',
@@ -231,7 +245,11 @@ export const boardData = {
               avatar: 'https://i.pravatar.cc/40?img=22',
             },
           ],
-          progress: '2/3',
+          checklist: [
+            { id: 'api-t1', text: 'Login + refresh flow', completed: true },
+            { id: 'api-t2', text: 'Rate limiting', completed: true },
+            { id: 'api-t3', text: 'Docs & examples', completed: false },
+          ],
         },
       ],
     },
@@ -244,8 +262,7 @@ export const boardData = {
           title: 'Project Kickoff',
           description: 'Initial meeting with stakeholders to finalize scope and milestones.',
           tags: [{ label: 'RESEARCH', tone: 'green' }],
-          date: 'Oct 15',
-          comments: 3,
+          dueDate: '2026-10-15',
           commentList: [
             {
               id: 'pk-c1',
@@ -285,7 +302,7 @@ export const boardData = {
               avatar: 'https://i.pravatar.cc/40?img=22',
             },
           ],
-          progress: '1/1',
+          checklist: [{ id: 'pk-t1', text: 'Kickoff complete', completed: true }],
           done: true,
         },
       ],

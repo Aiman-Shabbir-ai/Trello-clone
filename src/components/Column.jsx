@@ -1,8 +1,16 @@
 import { Card } from './Card'
-import { Ellipsis, Plus } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import './Column.css'
 
-export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
+export function Column({
+  column,
+  dragDisabled,
+  onMoveCard,
+  onCardOpen,
+  onAddCard,
+  onDeleteColumn,
+  onDeleteCard,
+}) {
   const completedCards = column.cards.filter((card) => card.done).length
 
   const handleDragOver = (event) => {
@@ -13,7 +21,7 @@ export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
     event.preventDefault()
     const cardId = event.dataTransfer.getData('cardId')
     const sourceColumnId = event.dataTransfer.getData('sourceColumnId')
-    onMoveCard(cardId, sourceColumnId, column.id)
+    onMoveCard(cardId, sourceColumnId, column.id, event)
   }
 
   return (
@@ -29,8 +37,17 @@ export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
           <button type="button" aria-label="Add card" onClick={() => onAddCard(column.id)}>
             <Plus size={14} />
           </button>
-          <button aria-label="More options">
-            <Ellipsis size={14} />
+          <button
+            type="button"
+            className="delete-list-btn"
+            aria-label={`Delete ${column.title} list`}
+            onClick={() => {
+              if (window.confirm(`Delete list "${column.title}" and all its cards?`)) {
+                onDeleteColumn(column.id)
+              }
+            }}
+          >
+            <Trash2 size={14} />
           </button>
         </div>
       </div>
@@ -41,7 +58,9 @@ export function Column({ column, onMoveCard, onCardOpen, onAddCard }) {
             key={card.id}
             card={card}
             columnId={column.id}
-            onOpen={() => onCardOpen(card, column.title)}
+            dragDisabled={dragDisabled}
+            onOpen={() => onCardOpen(card)}
+            onDelete={() => onDeleteCard(column.id, card.id)}
           />
         ))}
       </div>

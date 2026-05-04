@@ -28,6 +28,14 @@
   cursor: grabbing;
 }
 
+.task-card--no-drag {
+  cursor: pointer;
+}
+
+.task-card--no-drag:active {
+  cursor: pointer;
+}
+
 .task-card:focus-visible {
   outline: none;
   border-color: #8fb1df;
@@ -82,6 +90,12 @@
   flex-wrap: nowrap;
 }
 
+.card-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
 .card-meta {
   display: flex;
   align-items: center;
@@ -113,6 +127,25 @@
   border-color: #86efac;
   color: #15803d;
   font-weight: 600;
+}
+
+.card-delete-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.card-delete-btn:hover {
+  color: #dc2626;
+  border-color: #fecaca;
+  background: #fff1f2;
 }
 
 @media (prefers-reduced-motion: reduce) {

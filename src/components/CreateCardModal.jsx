@@ -19,6 +19,7 @@ const MEMBER_OPTIONS = [
 export function CreateCardModal({ isOpen, columnTitle, onClose, onSubmit }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [dueDate, setDueDate] = useState('')
   const [selectedLabels, setSelectedLabels] = useState(['DESIGN'])
   const [selectedMembers, setSelectedMembers] = useState([])
 
@@ -37,19 +38,18 @@ export function CreateCardModal({ isOpen, columnTitle, onClose, onSubmit }) {
     return () => window.removeEventListener('keydown', handleEscape)
   }, [isOpen, onClose])
 
-  useEffect(() => {
-    if (!isOpen) {
-      setTitle('')
-      setDescription('')
-      setSelectedLabels(['DESIGN'])
-      setSelectedMembers([])
-    }
-  }, [isOpen])
-
   const isSubmitDisabled = useMemo(() => !title.trim(), [title])
 
   if (!isOpen) {
     return null
+  }
+
+  const resetForm = () => {
+    setTitle('')
+    setDescription('')
+    setDueDate('')
+    setSelectedLabels(['DESIGN'])
+    setSelectedMembers([])
   }
 
   const toggleLabel = (label) => {
@@ -73,9 +73,11 @@ export function CreateCardModal({ isOpen, columnTitle, onClose, onSubmit }) {
     onSubmit({
       title,
       description,
+      dueDate: dueDate || null,
       labels: LABEL_OPTIONS.filter((item) => selectedLabels.includes(item.label)),
       members: MEMBER_OPTIONS.filter((item) => selectedMembers.includes(item.id)),
     })
+    resetForm()
   }
 
   return (
@@ -158,9 +160,23 @@ export function CreateCardModal({ isOpen, columnTitle, onClose, onSubmit }) {
             <Calendar size={16} />
             <span>Due Date</span>
           </div>
+          <input
+            type="date"
+            className="create-card-date"
+            value={dueDate}
+            onChange={(event) => setDueDate(event.target.value)}
+            aria-label="Due date"
+          />
 
           <footer className="create-card-footer">
-            <button type="button" className="ghost-btn" onClick={onClose}>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => {
+                resetForm()
+                onClose()
+              }}
+            >
               Cancel
             </button>
             <button type="submit" className="primary-btn" disabled={isSubmitDisabled}>

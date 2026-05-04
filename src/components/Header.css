@@ -33,11 +33,116 @@
   font-weight: 700;
 }
 
+.board-title-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.board-title-btn:focus-visible {
+  outline: none;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.board-title-input {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  color: #0f172a;
+  border: 1px solid #d5deea;
+  border-radius: 8px;
+  padding: 0.2rem 0.45rem;
+  min-width: 180px;
+  background: #ffffff;
+}
+
+.board-title-input:focus-visible {
+  outline: none;
+  border-color: #8fb1df;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
 .app-title {
   font-size: 0.9rem;
   font-weight: 600;
   margin: 0;
   color: #0f172a;
+}
+
+.filter-wrap {
+  position: relative;
+}
+
+.btn-ghost-active {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.chev-open {
+  transform: rotate(180deg);
+  transition: transform 120ms ease;
+}
+
+.filter-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+  min-width: 200px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  padding: 0.55rem 0.6rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.filter-panel-title {
+  margin: 0 0 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  color: #334155;
+  cursor: pointer;
+}
+
+.filter-clear {
+  margin-top: 0.2rem;
+  border: 0;
+  background: transparent;
+  color: #4f46e5;
+  font-size: 0.72rem;
+  cursor: pointer;
+  text-align: left;
+  padding: 0.15rem 0;
 }
 
 .search-box {

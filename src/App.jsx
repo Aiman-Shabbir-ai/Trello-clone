@@ -1,61 +1,123 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { boardData } from './data/boardData'
 import { Board } from './components/Board'
 import { Header } from './components/Header'
 import { CardDetailsModal } from './components/CardDetailsModal'
 import { CreateCardModal } from './components/CreateCardModal'
+import { HomePage } from './components/HomePage'
+import { loadBoardState, saveBoardState } from './utils/boardStorage'
+import { fetchBoardState, updateBoardState } from './utils/boardApi'
+import { moveCardToIndex } from './utils/moveCard'
+
+const INITIAL_BOARD = loadBoardState(boardData)
+
+function newId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+}
+
+function getDropIndex(event, container) {
+  const nodes = [...container.querySelectorAll('[data-card-id]')]
+  if (nodes.length === 0) {
+    return 0
+  }
+
+  let insertIndex = nodes.length
+  for (let i = 0; i < nodes.length; i += 1) {
+    const rect = nodes[i].getBoundingClientRect()
+    if (event.clientY < rect.top + rect.height / 2) {
+      insertIndex = i
+      break
+    }
+  }
+  return insertIndex
+}
+
+function getStarterColumns() {
+  return [
+    { id: `todo-${Date.now()}`, title: 'To Do', cards: [] },
+    { id: `doing-${Date.now() + 1}`, title: 'Doing', cards: [] },
+    { id: `done-${Date.now() + 2}`, title: 'Done', cards: [] },
+  ]
+}
 
 function App() {
-  const [columns, setColumns] = useState(boardData.columns)
-  const [selectedCard, setSelectedCard] = useState(null)
+  const [activeView, setActiveView] = useState('home')
+  const [recentBoards, setRecentBoards] = useState([])
+  const [columns, setColumns] = useState(() => INITIAL_BOARD.columns)
+  const [boardTitle, setBoardTitle] = useState(() => INITIAL_BOARD.boardTitle)
+  const [isRemoteLoaded, setIsRemoteLoaded] = useState(false)
+  const [selection, setSelection] = useState(null)
   const [createCardColumnId, setCreateCardColumnId] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [filterLabels, setFilterLabels] = useState([])
 
-  const onMoveCard = (cardId, fromColumnId, toColumnId) => {
-    if (!cardId || !fromColumnId || !toColumnId || fromColumnId === toColumnId) {
+  useEffect(() => {
+    let isCancelled = false
+
+    fetchBoardState()
+      .then((remoteState) => {
+        if (isCancelled) {
+          return
+        }
+        setColumns(remoteState.columns)
+        setBoardTitle(remoteState.boardTitle)
+        saveBoardState(remoteState.columns, remoteState.boardTitle)
+      })
+      .catch(() => {
+        // Keep local fallback when API is unavailable
+      })
+      .finally(() => {
+        if (!isCancelled) {
+          setIsRemoteLoaded(true)
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isRemoteLoaded) {
       return
     }
 
-    setColumns((prevColumns) => {
-      const sourceColumn = prevColumns.find((column) => column.id === fromColumnId)
-      const targetColumn = prevColumns.find((column) => column.id === toColumnId)
-
-      if (!sourceColumn || !targetColumn) {
-        return prevColumns
-      }
-
-      const cardToMove = sourceColumn.cards.find((card) => card.id === cardId)
-      if (!cardToMove) {
-        return prevColumns
-      }
-
-      return prevColumns.map((column) => {
-        if (column.id === fromColumnId) {
-          return {
-            ...column,
-            cards: column.cards.filter((card) => card.id !== cardId),
-          }
-        }
-
-        if (column.id === toColumnId) {
-          return {
-            ...column,
-            cards: [...column.cards, cardToMove],
-          }
-        }
-
-        return column
-      })
+    saveBoardState(columns, boardTitle)
+    updateBoardState({ columns, boardTitle }).catch(() => {
+      // Local copy is still saved; API can recover later.
     })
+  }, [columns, boardTitle, isRemoteLoaded])
+
+  const selectedCardView = useMemo(() => {
+    if (!selection) {
+      return null
+    }
+    const column = columns.find((item) => item.id === selection.columnId)
+    const card = column?.cards.find((item) => item.id === selection.cardId)
+    if (!column || !card) {
+      return null
+    }
+    return { card, columnId: column.id, columnTitle: column.title }
+  }, [columns, selection])
+
+  const onMoveCard = (cardId, fromColumnId, toColumnId, event) => {
+    if (!cardId || !fromColumnId || !toColumnId) {
+      return
+    }
+
+    const container = event.currentTarget
+    const insertIndex = getDropIndex(event, container)
+
+    setColumns((prev) => moveCardToIndex(prev, cardId, fromColumnId, toColumnId, insertIndex))
   }
 
-  const onOpenCard = (card, columnTitle) => {
-    setSelectedCard({ ...card, columnTitle })
+  const onOpenCard = (card, columnId, columnTitle) => {
+    setSelection({ columnId, cardId: card.id, columnTitle })
   }
 
   const onCloseCard = () => {
-    setSelectedCard(null)
+    setSelection(null)
   }
 
   const onOpenCreateCard = (columnId) => {
@@ -66,6 +128,34 @@ function App() {
     setCreateCardColumnId(null)
   }
 
+  const onUpdateCard = (columnId, cardId, patch) => {
+    setColumns((prev) =>
+      prev.map((column) =>
+        column.id === columnId
+          ? {
+              ...column,
+              cards: column.cards.map((card) => (card.id === cardId ? { ...card, ...patch } : card)),
+            }
+          : column
+      )
+    )
+  }
+
+  const onArchiveCard = (columnId, cardId) => {
+    setColumns((prev) =>
+      prev.map((column) =>
+        column.id === columnId
+          ? { ...column, cards: column.cards.filter((card) => card.id !== cardId) }
+          : column
+      )
+    )
+    setSelection((current) => (current?.cardId === cardId ? null : current))
+  }
+
+  const onDeleteCard = (columnId, cardId) => {
+    onArchiveCard(columnId, cardId)
+  }
+
   const onAddCard = (columnId, payload) => {
     const title = payload.title.trim()
     const description = payload.description.trim()
@@ -74,37 +164,66 @@ function App() {
       return
     }
 
-    const dueDate = new Date().toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    })
-
     const newCard = {
-      id: `${columnId}-${Date.now()}`,
+      id: newId(columnId),
       title,
       description: description || 'No description added yet.',
       tags: payload.labels?.length ? payload.labels : [{ label: 'NEW', tone: 'blue' }],
-      date: dueDate,
-      comments: 0,
+      dueDate: payload.dueDate || null,
       commentList: [],
       assignees: payload.members?.length ? payload.members : [],
-      progress: '0/1',
+      checklist: [],
+      done: false,
     }
 
-    setColumns((prevColumns) =>
-      prevColumns.map((column) =>
+    setColumns((prev) =>
+      prev.map((column) =>
         column.id === columnId ? { ...column, cards: [...column.cards, newCard] } : column
       )
     )
     onCloseCreateCard()
   }
 
+  const onAddColumn = (title) => {
+    const label = title.trim()
+    if (!label) {
+      return
+    }
+
+    setColumns((prev) => [...prev, { id: newId('list'), title: label, cards: [] }])
+  }
+
+  const onDeleteColumn = (columnId) => {
+    setColumns((prev) => prev.filter((column) => column.id !== columnId))
+    setSelection((current) => (current?.columnId === columnId ? null : current))
+    setCreateCardColumnId((current) => (current === columnId ? null : current))
+  }
+
+  const onRenameBoard = (title) => {
+    const next = title.trim()
+    if (!next) {
+      return
+    }
+    setBoardTitle(next)
+  }
+
   const activeCreateColumn = columns.find((column) => column.id === createCardColumnId)
   const normalizedSearchQuery = searchQuery.trim().toLowerCase()
 
   const filteredColumns = useMemo(() => {
+    let next = columns
+
+    if (filterLabels.length > 0) {
+      next = next.map((column) => ({
+        ...column,
+        cards: column.cards.filter((card) =>
+          (card.tags ?? []).some((tag) => filterLabels.includes(tag.label))
+        ),
+      }))
+    }
+
     if (!normalizedSearchQuery) {
-      return columns
+      return next
     }
 
     const matchesQuery = (card, columnTitle) => {
@@ -115,7 +234,7 @@ function App() {
         .map((member) => `${member.name ?? ''} ${member.id ?? ''}`.toLowerCase())
         .join(' ')
       const commentAuthors = (card.commentList ?? [])
-        .map((comment) => comment.author?.toLowerCase() ?? '')
+        .map((comment) => `${comment.author ?? ''} ${comment.text ?? ''}`.toLowerCase())
         .join(' ')
       const searchableText = [title, description, labels, assignees, commentAuthors, columnTitle]
         .filter(Boolean)
@@ -124,26 +243,91 @@ function App() {
       return searchableText.includes(normalizedSearchQuery)
     }
 
-    return columns.map((column) => ({
+    return next.map((column) => ({
       ...column,
       cards: column.cards.filter((card) => matchesQuery(card, column.title.toLowerCase())),
     }))
-  }, [columns, normalizedSearchQuery])
+  }, [columns, normalizedSearchQuery, filterLabels])
+
+  const totalCards = useMemo(
+    () => columns.reduce((sum, column) => sum + column.cards.length, 0),
+    [columns]
+  )
+  const visibleCards = useMemo(
+    () => filteredColumns.reduce((sum, column) => sum + column.cards.length, 0),
+    [filteredColumns]
+  )
+
+  const isBoardFiltered = totalCards !== visibleCards
+
+  const onCreateBoard = ({ title, color }) => {
+    setBoardTitle(title)
+    setColumns(getStarterColumns())
+    setSelection(null)
+    setCreateCardColumnId(null)
+    setSearchQuery('')
+    setFilterLabels([])
+    setActiveView('board')
+    setRecentBoards((prev) => [
+      { id: newId('recent'), title, workspace: 'Trello Workspace', color },
+      ...prev.filter((board) => board.title !== title),
+    ])
+  }
+
+  if (activeView === 'home') {
+    return (
+      <HomePage
+        recentBoards={recentBoards}
+        onOpenBoard={() => setActiveView('board')}
+        onCreateBoard={onCreateBoard}
+      />
+    )
+  }
 
   return (
     <div className="app-shell">
-      <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+      <Header
+        boardTitle={boardTitle}
+        onRenameBoard={onRenameBoard}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterLabels={filterLabels}
+        onFilterLabelsChange={setFilterLabels}
+        onGoHome={() => setActiveView('home')}
+      />
       <Board
         columns={filteredColumns}
+        totalCards={totalCards}
+        visibleCards={visibleCards}
+        isBoardFiltered={isBoardFiltered}
         searchQuery={searchQuery}
+        filterLabels={filterLabels}
         onMoveCard={onMoveCard}
         onCardOpen={onOpenCard}
         onAddCard={onOpenCreateCard}
+        onAddColumn={onAddColumn}
+        onDeleteColumn={onDeleteColumn}
+        onDeleteCard={onDeleteCard}
       />
-      <CardDetailsModal card={selectedCard} onClose={onCloseCard} />
+      <CardDetailsModal
+        key={selectedCardView ? selectedCardView.card.id : 'no-card'}
+        selection={selectedCardView}
+        columns={columns}
+        onClose={onCloseCard}
+        onUpdateCard={onUpdateCard}
+        onArchiveCard={onArchiveCard}
+        onMoveCard={(cardId, fromColumnId, toColumnId) => {
+          setColumns((prev) => {
+            const target = prev.find((column) => column.id === toColumnId)
+            const insertIndex = target ? target.cards.length : 0
+            return moveCardToIndex(prev, cardId, fromColumnId, toColumnId, insertIndex)
+          })
+        }}
+      />
       <CreateCardModal
+        key={createCardColumnId ?? 'closed'}
         isOpen={Boolean(activeCreateColumn)}
-        columnTitle={activeCreateColumn ? `${activeCreateColumn.title} Column` : ''}
+        columnTitle={activeCreateColumn ? `${activeCreateColumn.title}` : ''}
         onClose={onCloseCreateCard}
         onSubmit={(payload) => onAddCard(createCardColumnId, payload)}
       />

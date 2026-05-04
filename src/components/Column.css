@@ -61,6 +61,12 @@
   color: #73849b;
 }
 
+.delete-list-btn:hover {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #dc2626;
+}
+
 .column-actions button:focus-visible {
   outline: none;
   border-color: #8fb1df;

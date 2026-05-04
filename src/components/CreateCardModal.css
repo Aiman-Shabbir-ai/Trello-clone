@@ -90,6 +90,23 @@
   font-weight: 600;
 }
 
+.create-card-date {
+  width: 100%;
+  max-width: 220px;
+  border: 1px solid #d6deea;
+  border-radius: 10px;
+  padding: 0.48rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  color: #334155;
+  background: #ffffff;
+}
+
+.create-card-date:focus-visible {
+  outline: none;
+  border-color: #5b5cf8;
+}
+
 .label-pills {
   display: flex;
   gap: 0.65rem;

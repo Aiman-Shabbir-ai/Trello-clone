@@ -1,0 +1,680 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  BadgeHelp,
+  Bell,
+  Bookmark,
+  ChevronDown,
+  Clock3,
+  Compass,
+  Globe2,
+  HelpCircle,
+  Home,
+  Info,
+  LayoutGrid,
+  LayoutTemplate,
+  Lock,
+  Pencil,
+  Settings,
+  Plus,
+  Search,
+  SquareKanban,
+  UserRound,
+  Users,
+  UserCircle2,
+  X,
+} from 'lucide-react'
+import './HomePage.css'
+
+const RECENT_BOARDS = [
+  { id: 'b1', title: 'ParentsPlus', workspace: 'Trello Workspace', color: 'sunset' },
+  { id: 'b2', title: 'Trello Clone', workspace: 'Trello Workspace', color: 'violet' },
+  {
+    id: 'b3',
+    title: 'AI-Based Fake News Detection',
+    workspace: 'Trello Workspace',
+    color: 'teal',
+  },
+  { id: 'b4', title: 'My Trello board', workspace: 'Trello Workspace', color: 'pink' },
+]
+
+const BACKGROUND_IMAGE_PRESETS = [
+  { id: 'img-night', className: 'bg-thumb-night', boardTone: 'violet' },
+  { id: 'img-nebula', className: 'bg-thumb-nebula', boardTone: 'teal' },
+  { id: 'img-mountains', className: 'bg-thumb-mountains', boardTone: 'sunset' },
+  { id: 'img-forest', className: 'bg-thumb-forest', boardTone: 'pink' },
+]
+
+const BACKGROUND_COLOR_PRESETS = [
+  { id: 'blue', className: 'blue', boardTone: 'teal' },
+  { id: 'indigo', className: 'indigo', boardTone: 'violet' },
+  { id: 'violet', className: 'violet', boardTone: 'violet' },
+  { id: 'magenta', className: 'magenta', boardTone: 'pink' },
+]
+
+const VISIBILITY_OPTIONS = [
+  {
+    id: 'private',
+    label: 'Private',
+    description:
+      'Only board members can see this board. Workspace admins can close the board or remove members.',
+    icon: Lock,
+  },
+  {
+    id: 'workspace',
+    label: 'Workspace',
+    description:
+      'All members of the Trello Workspace can see and edit this board.',
+    icon: Users,
+  },
+  {
+    id: 'public',
+    label: 'Public',
+    description: 'Anyone on the internet can see this board. Only board members can edit.',
+    icon: Globe2,
+  },
+]
+
+const TEMPLATE_CATEGORY_LIST = [
+  'Popular',
+  'Small business',
+  'Design',
+  'Education',
+  'Engineering-IT',
+  'Marketing',
+  'Human Resources',
+  'Operations',
+  'Sales CRM',
+]
+
+const TEMPLATE_CARDS = [
+  { id: 't1', title: 'My Tasks | Trello', tone: 'template-orange', category: 'Popular' },
+  { id: 't2', title: 'New Hire Onboarding', tone: 'template-green', category: 'Human Resources' },
+  { id: 't3', title: 'Tier List', tone: 'template-blue', category: 'Education' },
+  { id: 't4', title: 'Innovation Weeks', tone: 'template-gold', category: 'Marketing' },
+  { id: 't5', title: 'Brand Guidelines', tone: 'template-teal', category: 'Design' },
+  { id: 't6', title: 'Small Biz CRM', tone: 'template-violet', category: 'Small business' },
+  { id: 't7', title: 'Sprint Board', tone: 'template-slate', category: 'Engineering-IT' },
+  { id: 't8', title: 'Sales Pipeline', tone: 'template-coral', category: 'Sales CRM' },
+  { id: 't9', title: 'Ops Checklist', tone: 'template-mint', category: 'Operations' },
+]
+
+function PopularTemplatesPanel({
+  selectedCategory,
+  onSelectCategory,
+  visibleTemplates,
+  isDismissed,
+  onDismiss,
+  templateIdPrefix,
+}) {
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownWrapRef = useRef(null)
+
+  useEffect(() => {
+    if (!dropdownOpen) {
+      return
+    }
+    const onDocMouseDown = (event) => {
+      if (dropdownWrapRef.current && !dropdownWrapRef.current.contains(event.target)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [dropdownOpen])
+
+  if (isDismissed) {
+    return null
+  }
+
+  return (
+    <section className="templates-section popular-templates-panel">
+      <button
+        type="button"
+        className="popular-templates-dismiss"
+        onClick={onDismiss}
+        aria-label="Dismiss templates section"
+      >
+        <X size={14} />
+      </button>
+      <div className="popular-templates-title-row">
+        <span className="popular-templates-icon" aria-hidden="true">
+          <LayoutTemplate size={20} strokeWidth={1.75} />
+        </span>
+        <h3>Most popular templates</h3>
+      </div>
+      <p className="popular-templates-intro">
+        <span className="popular-templates-intro-text">
+          Get going faster with a template from the Trello community or
+        </span>
+        <span className="template-category-dropdown" ref={dropdownWrapRef}>
+          <button
+            type="button"
+            className="template-category-trigger"
+            aria-expanded={dropdownOpen}
+            aria-haspopup="listbox"
+            aria-label="Choose a template category"
+            onClick={() => setDropdownOpen((open) => !open)}
+          >
+            {selectedCategory}
+            <ChevronDown size={14} aria-hidden />
+          </button>
+          {dropdownOpen ? (
+            <ul className="template-category-menu" role="listbox">
+              {TEMPLATE_CATEGORY_LIST.map((category) => (
+                <li key={category} role="presentation">
+                  <button
+                    type="button"
+                    role="option"
+                    aria-selected={category === selectedCategory}
+                    className={category === selectedCategory ? 'is-active' : ''}
+                    onClick={() => {
+                      onSelectCategory(category)
+                      setDropdownOpen(false)
+                    }}
+                  >
+                    {category}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </span>
+      </p>
+      <div className="template-grid">
+        {visibleTemplates.map((template) => (
+          <article key={`${templateIdPrefix}-template-${template.id}`} className="template-card">
+            <span className={`template-cover ${template.tone}`} />
+            <p>{template.title}</p>
+          </article>
+        ))}
+      </div>
+      <button type="button" className="browse-template-link">
+        Browse the full template gallery
+      </button>
+    </section>
+  )
+}
+
+export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('home')
+  const [newBoardTitle, setNewBoardTitle] = useState('')
+  const [selectedBackgroundId, setSelectedBackgroundId] = useState('img-night')
+  const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('Popular')
+  const [templatesPromoDismissed, setTemplatesPromoDismissed] = useState(false)
+  const [visibility, setVisibility] = useState('workspace')
+  const [isVisibilityOpen, setIsVisibilityOpen] = useState(false)
+  const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true)
+  const contentRef = useRef(null)
+
+  const boardsToShow = useMemo(
+    () => (recentBoards.length > 0 ? recentBoards : RECENT_BOARDS),
+    [recentBoards]
+  )
+  const selectedBackground = useMemo(
+    () =>
+      [...BACKGROUND_IMAGE_PRESETS, ...BACKGROUND_COLOR_PRESETS].find(
+        (item) => item.id === selectedBackgroundId
+      ) ?? BACKGROUND_IMAGE_PRESETS[0],
+    [selectedBackgroundId]
+  )
+  const selectedVisibility = useMemo(
+    () => VISIBILITY_OPTIONS.find((item) => item.id === visibility) ?? VISIBILITY_OPTIONS[1],
+    [visibility]
+  )
+  const visibleTemplates = useMemo(() => {
+    if (selectedTemplateCategory === 'Popular') {
+      return TEMPLATE_CARDS
+    }
+    return TEMPLATE_CARDS.filter((item) => item.category === selectedTemplateCategory)
+  }, [selectedTemplateCategory])
+  const SelectedVisibilityIcon = selectedVisibility.icon
+
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0
+    }
+  }, [activeSection])
+
+  const handleCreate = (event) => {
+    event.preventDefault()
+    const title = newBoardTitle.trim()
+    if (!title) {
+      return
+    }
+
+    onCreateBoard({ title, color: selectedBackground.boardTone })
+    setIsCreateModalOpen(false)
+    setNewBoardTitle('')
+  }
+
+  return (
+    <div className="home-page">
+      <header className="home-topbar">
+        <div className="home-topbar-left">
+          <button type="button" className="top-icon-btn" aria-label="Apps">
+            <LayoutGrid size={15} />
+          </button>
+          <div className="trello-mark" aria-hidden="true">
+            T
+          </div>
+          <div className="home-search">
+            <Search size={14} />
+            <input type="text" placeholder="Search" aria-label="Search" />
+          </div>
+        </div>
+        <div className="home-topbar-right">
+          <button type="button" className="create-btn" onClick={() => setIsCreateModalOpen(true)}>
+            Create
+          </button>
+          <button type="button" className="top-icon-btn" aria-label="Notifications">
+            <Bell size={15} />
+          </button>
+          <button type="button" className="top-icon-btn" aria-label="Help">
+            <HelpCircle size={15} />
+          </button>
+          <button type="button" className="top-icon-btn" aria-label="Account">
+            <UserCircle2 size={15} />
+          </button>
+        </div>
+      </header>
+
+      <div className="home-layout">
+        <aside className="home-sidebar">
+          <button
+            type="button"
+            className={`sidebar-item ${activeSection === 'boards' ? 'active' : ''}`}
+            onClick={() => setActiveSection('boards')}
+          >
+            <Bookmark size={14} />
+            Boards
+          </button>
+          <button
+            type="button"
+            className={`sidebar-item ${activeSection === 'templates' ? 'active' : ''}`}
+            onClick={() => setActiveSection('templates')}
+          >
+            <Compass size={14} />
+            Templates
+          </button>
+          <button
+            type="button"
+            className={`sidebar-item ${activeSection === 'home' ? 'active' : ''}`}
+            onClick={() => setActiveSection('home')}
+          >
+            <Home size={14} />
+            Home
+          </button>
+
+          <div className="workspace-block">
+            <p>Workspaces</p>
+            <button
+              type="button"
+              className={`workspace-item ${activeSection === 'workspace' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveSection('workspace')
+                setIsWorkspaceOpen(true)
+              }}
+              aria-expanded={isWorkspaceOpen}
+            >
+              <span className="workspace-avatar">T</span>
+              Trello Workspace
+              <ChevronDown size={14} />
+            </button>
+            {isWorkspaceOpen && (
+              <div className="workspace-panel">
+                <button type="button" className="workspace-link">
+                  <SquareKanban size={14} />
+                  Boards
+                </button>
+                <button type="button" className="workspace-link">
+                  <Users size={14} />
+                  Members
+                </button>
+                <button type="button" className="workspace-link">
+                  <Settings size={14} />
+                  Settings
+                </button>
+                <div className="workspace-upgrade">
+                  <strong>Upgrade this Workspace</strong>
+                  <p>
+                    Get unlimited boards, advanced automation, and more.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <main className="workspace-content" ref={contentRef}>
+          {activeSection === 'workspace' ? (
+            <>
+              <section className="workspace-header">
+                <div className="workspace-badge">T</div>
+                <div>
+                  <h2>
+                    Trello Workspace <Pencil size={14} />
+                  </h2>
+                  <p>
+                    <Lock size={12} /> Private
+                  </p>
+                </div>
+              </section>
+
+              <PopularTemplatesPanel
+                selectedCategory={selectedTemplateCategory}
+                onSelectCategory={setSelectedTemplateCategory}
+                visibleTemplates={visibleTemplates}
+                isDismissed={templatesPromoDismissed}
+                onDismiss={() => setTemplatesPromoDismissed(true)}
+                templateIdPrefix="workspace"
+              />
+
+              <section className="boards-section">
+                <h3>
+                  <UserRound size={16} />
+                  Your boards
+                </h3>
+                <div className="board-grid">
+                  {boardsToShow.map((board) => (
+                    <button
+                      key={`workspace-${board.id}-main`}
+                      type="button"
+                      className="board-tile"
+                      onClick={() => onOpenBoard(board)}
+                    >
+                      <span className={`board-tile-cover ${board.color}`} />
+                      <strong>{board.title}</strong>
+                    </button>
+                  ))}
+                  <button type="button" className="board-tile create-tile" onClick={() => setIsCreateModalOpen(true)}>
+                    <span>Create new board</span>
+                    <small>7 remaining</small>
+                  </button>
+                </div>
+              </section>
+            </>
+          ) : activeSection === 'boards' || activeSection === 'templates' ? (
+            <>
+              <PopularTemplatesPanel
+                selectedCategory={selectedTemplateCategory}
+                onSelectCategory={setSelectedTemplateCategory}
+                visibleTemplates={visibleTemplates}
+                isDismissed={templatesPromoDismissed}
+                onDismiss={() => setTemplatesPromoDismissed(true)}
+                templateIdPrefix="boards"
+              />
+
+              <section className="boards-section">
+                <h3>
+                  <Clock3 size={16} />
+                  Recently viewed
+                </h3>
+                <div className="board-grid">
+                  {boardsToShow.map((board) => (
+                    <button
+                      key={`recent-${board.id}`}
+                      type="button"
+                      className="board-tile"
+                      onClick={() => onOpenBoard(board)}
+                    >
+                      <span className={`board-tile-cover ${board.color}`} />
+                      <strong>{board.title}</strong>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="boards-section">
+                <h4 className="workspace-section-title">YOUR WORKSPACES</h4>
+                <div className="workspace-group-header">
+                  <div className="workspace-group-name">
+                    <span className="workspace-avatar">T</span>
+                    <strong>Trello Workspace</strong>
+                  </div>
+                  <div className="workspace-group-actions">
+                    <button type="button">Boards</button>
+                    <button type="button">Members</button>
+                    <button type="button">Settings</button>
+                    <button type="button" className="upgrade-pill">
+                      Upgrade
+                    </button>
+                  </div>
+                </div>
+                <div className="board-grid">
+                  {boardsToShow.slice(0, 3).map((board) => (
+                    <button
+                      key={`your-workspaces-${board.id}`}
+                      type="button"
+                      className="board-tile"
+                      onClick={() => onOpenBoard(board)}
+                    >
+                      <span className={`board-tile-cover ${board.color}`} />
+                      <strong>{board.title}</strong>
+                    </button>
+                  ))}
+                  <button type="button" className="board-tile create-tile" onClick={() => setIsCreateModalOpen(true)}>
+                    <span>Create new board</span>
+                    <small>7 remaining</small>
+                  </button>
+                </div>
+              </section>
+
+              <section className="boards-section">
+                <h4 className="workspace-section-title">
+                  GUEST WORKSPACES <Info size={13} />
+                </h4>
+                <div className="workspace-group-header guest">
+                  <div className="workspace-group-name">
+                    <span className="workspace-avatar guest-avatar">T</span>
+                    <strong>Trello workspace</strong>
+                  </div>
+                </div>
+                <div className="board-grid guest-grid">
+                  <button type="button" className="board-tile" onClick={() => onOpenBoard(boardsToShow[0])}>
+                    <span className={`board-tile-cover ${boardsToShow[0]?.color ?? 'sunset'}`} />
+                    <strong>{boardsToShow[0]?.title ?? 'ParentsPlus'}</strong>
+                  </button>
+                </div>
+                <button type="button" className="closed-boards-btn">
+                  View all closed boards
+                </button>
+              </section>
+            </>
+          ) : (
+            <div className="home-dashboard">
+              <section className="home-hero">
+                <div className="hero-image" />
+                <h2>Stay on track and up to date</h2>
+                <p>
+                  Invite people to boards and cards, leave comments, add due dates, and we&apos;ll show
+                  the most important activity here.
+                </p>
+              </section>
+
+              <aside className="home-right-panel">
+                <h3>
+                  <Clock3 size={14} />
+                  Recently viewed
+                </h3>
+                <ul>
+                  {boardsToShow.map((board) => (
+                    <li key={`home-${board.id}`}>
+                      <button type="button" className="recent-board" onClick={() => onOpenBoard(board)}>
+                        <span className={`board-chip ${board.color}`} />
+                        <span>
+                          <strong>{board.title}</strong>
+                          <small>{board.workspace}</small>
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="link-block">
+                  <p>Links</p>
+                  <button
+                    type="button"
+                    className="new-board-link"
+                    onClick={() => setIsCreateModalOpen(true)}
+                  >
+                    <Plus size={14} />
+                    Create new board
+                  </button>
+                </div>
+              </aside>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {isCreateModalOpen && (
+        <div
+          className="create-board-overlay"
+          onClick={() => setIsCreateModalOpen(false)}
+          role="presentation"
+        >
+          <form
+            className="create-board-modal"
+            onSubmit={handleCreate}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="create-modal-close"
+              aria-label="Close create board"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
+              <X size={15} />
+            </button>
+            <h3>Create board</h3>
+            <div className={`create-board-preview ${selectedBackground.className}`}>
+              <div className="mini-list">
+                <span />
+                <span />
+                <span />
+              </div>
+              <div className="mini-list">
+                <span />
+                <span />
+              </div>
+              <div className="mini-list">
+                <span />
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+            <div className="background-picker">
+              <p>Background</p>
+              <div className="background-image-options">
+                {BACKGROUND_IMAGE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    className={`board-image-pick ${preset.className} ${selectedBackgroundId === preset.id ? 'active' : ''}`}
+                    onClick={() => setSelectedBackgroundId(preset.id)}
+                    aria-label={`Select ${preset.id}`}
+                  />
+                ))}
+                <button type="button" className="board-more-pick" aria-label="More backgrounds">
+                  ...
+                </button>
+              </div>
+              <div className="background-color-options">
+                {BACKGROUND_COLOR_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    className={`board-color-pick ${preset.className} ${selectedBackgroundId === preset.id ? 'active' : ''}`}
+                    onClick={() => setSelectedBackgroundId(preset.id)}
+                    aria-label={`Select ${preset.id} color`}
+                  />
+                ))}
+              </div>
+            </div>
+            <label>
+              Board title
+              <input
+                type="text"
+                className={!newBoardTitle.trim() ? 'invalid-input' : ''}
+                value={newBoardTitle}
+                onChange={(event) => setNewBoardTitle(event.target.value)}
+                placeholder="e.g. Product launch roadmap"
+                autoFocus
+              />
+            </label>
+            {!newBoardTitle.trim() && (
+              <p className="field-error">
+                <BadgeHelp size={13} />
+                Board title is required
+              </p>
+            )}
+            <div className="visibility-group">
+              <p>Visibility</p>
+              {isVisibilityOpen && (
+                <div className="visibility-dropdown" role="listbox" aria-label="Board visibility options">
+                  {VISIBILITY_OPTIONS.map((option) => {
+                    const Icon = option.icon
+                    const active = option.id === visibility
+                    return (
+                      <button
+                        key={option.id}
+                        type="button"
+                        className={`visibility-option ${active ? 'active' : ''}`}
+                        onClick={() => {
+                          setVisibility(option.id)
+                          setIsVisibilityOpen(false)
+                        }}
+                      >
+                        <Icon size={14} />
+                        <span>
+                          <strong>{option.label}</strong>
+                          <small>{option.description}</small>
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              <button
+                type="button"
+                className="visibility-select"
+                onClick={() => setIsVisibilityOpen((current) => !current)}
+              >
+                <span>
+                  <SelectedVisibilityIcon size={13} />
+                  {selectedVisibility.label}
+                </span>
+                <ChevronDown size={14} />
+              </button>
+              <small>
+                This Workspace has 7 boards remaining. Free Workspaces can only have 10 open boards.
+                For unlimited boards, upgrade your Workspace.
+              </small>
+            </div>
+            <button type="button" className="upgrade-action">
+              <Plus size={14} />
+              Upgrade
+            </button>
+            <div className="create-board-actions stacked">
+              <button
+                type="submit"
+                className="primary-action full-width"
+                disabled={!newBoardTitle.trim()}
+              >
+                Create
+              </button>
+              <button type="button" className="ghost-action full-width" onClick={() => setIsCreateModalOpen(false)}>
+                Start with a template
+              </button>
+            </div>
+            <p className="legal-note">
+              By using images from Unsplash, you agree to their license and Terms of Service.
+            </p>
+          </form>
+        </div>
+      )}
+    </div>
+  )
+}
