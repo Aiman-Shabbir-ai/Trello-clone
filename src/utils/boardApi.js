@@ -2,7 +2,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000
 const BOARD_ENDPOINT = `${API_BASE_URL}/board`
 
 function isValidBoardState(value) {
-  return Boolean(value && typeof value.boardTitle === 'string' && Array.isArray(value.columns))
+  return Boolean(
+    value &&
+      typeof value.boardTitle === 'string' &&
+      Array.isArray(value.columns) &&
+      (typeof value.backgroundColor === 'undefined' || typeof value.backgroundColor === 'string')
+  )
 }
 
 export async function fetchBoardState() {

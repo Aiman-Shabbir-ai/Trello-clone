@@ -575,6 +575,54 @@
   cursor: pointer;
 }
 
+.template-card {
+  border: 1px solid #323a47;
+  background: #222833;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    transform 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.template-card:hover {
+  transform: translateY(-2px);
+  border-color: #579dff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.28);
+}
+
+.template-card:focus-visible {
+  outline: none;
+  border-color: #85b8ff;
+  box-shadow: 0 0 0 2px rgba(87, 157, 255, 0.28);
+}
+
+.template-card-body {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.45rem 0.5rem 0.55rem;
+}
+
+.template-card-body p {
+  padding: 0;
+}
+
+.template-card-meta {
+  color: #91a3b8;
+  font-size: 0.72rem;
+}
+
+.template-card-cta {
+  margin-top: 0.1rem;
+  color: #85b8ff;
+  font-size: 0.74rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+}
+
 .create-tile {
   display: grid;
   place-items: center;

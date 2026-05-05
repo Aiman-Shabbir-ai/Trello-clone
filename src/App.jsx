@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { boardData } from './data/boardData'
 import { Board } from './components/Board'
@@ -11,6 +11,12 @@ import { fetchBoardState, updateBoardState } from './utils/boardApi'
 import { moveCardToIndex } from './utils/moveCard'
 
 const INITIAL_BOARD = loadBoardState(boardData)
+const BOARD_BACKGROUND_STYLES = {
+  sunset: 'linear-gradient(135deg, #f97316 0%, #fb7185 100%)',
+  violet: 'linear-gradient(135deg, #4f46e5 0%, #a855f7 100%)',
+  teal: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
+  pink: 'linear-gradient(135deg, #db2777 0%, #f472b6 100%)',
+}
 
 function newId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
@@ -42,10 +48,14 @@ function getStarterColumns() {
 }
 
 function App() {
+  const userInitializedBoardRef = useRef(false)
   const [activeView, setActiveView] = useState('home')
   const [recentBoards, setRecentBoards] = useState([])
   const [columns, setColumns] = useState(() => INITIAL_BOARD.columns)
   const [boardTitle, setBoardTitle] = useState(() => INITIAL_BOARD.boardTitle)
+  const [boardBackgroundColor, setBoardBackgroundColor] = useState(
+    () => INITIAL_BOARD.backgroundColor ?? 'violet'
+  )
   const [isRemoteLoaded, setIsRemoteLoaded] = useState(false)
   const [selection, setSelection] = useState(null)
   const [createCardColumnId, setCreateCardColumnId] = useState(null)
@@ -57,12 +67,13 @@ function App() {
 
     fetchBoardState()
       .then((remoteState) => {
-        if (isCancelled) {
+        if (isCancelled || userInitializedBoardRef.current) {
           return
         }
         setColumns(remoteState.columns)
         setBoardTitle(remoteState.boardTitle)
-        saveBoardState(remoteState.columns, remoteState.boardTitle)
+        setBoardBackgroundColor(remoteState.backgroundColor ?? 'violet')
+        saveBoardState(remoteState.columns, remoteState.boardTitle, remoteState.backgroundColor ?? 'violet')
       })
       .catch(() => {
         // Keep local fallback when API is unavailable
@@ -83,11 +94,11 @@ function App() {
       return
     }
 
-    saveBoardState(columns, boardTitle)
-    updateBoardState({ columns, boardTitle }).catch(() => {
+    saveBoardState(columns, boardTitle, boardBackgroundColor)
+    updateBoardState({ columns, boardTitle, backgroundColor: boardBackgroundColor }).catch(() => {
       // Local copy is still saved; API can recover later.
     })
-  }, [columns, boardTitle, isRemoteLoaded])
+  }, [columns, boardTitle, boardBackgroundColor, isRemoteLoaded])
 
   const selectedCardView = useMemo(() => {
     if (!selection) {
@@ -260,16 +271,21 @@ function App() {
 
   const isBoardFiltered = totalCards !== visibleCards
 
-  const onCreateBoard = ({ title, color }) => {
+  const onCreateBoard = ({ title, color, columns: templateColumns }) => {
+    userInitializedBoardRef.current = true
+    const nextColor = color ?? 'violet'
     setBoardTitle(title)
-    setColumns(getStarterColumns())
+    setBoardBackgroundColor(nextColor)
+    setColumns(
+      Array.isArray(templateColumns) && templateColumns.length > 0 ? templateColumns : getStarterColumns()
+    )
     setSelection(null)
     setCreateCardColumnId(null)
     setSearchQuery('')
     setFilterLabels([])
     setActiveView('board')
     setRecentBoards((prev) => [
-      { id: newId('recent'), title, workspace: 'Trello Workspace', color },
+      { id: newId('recent'), title, workspace: 'Trello Workspace', color: nextColor },
       ...prev.filter((board) => board.title !== title),
     ])
   }
@@ -285,7 +301,10 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div
+      className="app-shell"
+      style={{ background: BOARD_BACKGROUND_STYLES[boardBackgroundColor] ?? BOARD_BACKGROUND_STYLES.violet }}
+    >
       <Header
         boardTitle={boardTitle}
         onRenameBoard={onRenameBoard}

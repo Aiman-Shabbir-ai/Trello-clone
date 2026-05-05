@@ -1,5 +1,6 @@
 export const boardData = {
   boardTitle: 'Product roadmap',
+  backgroundColor: 'violet',
   columns: [
     {
       id: 'backlog',

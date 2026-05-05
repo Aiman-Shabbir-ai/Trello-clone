@@ -22,6 +22,7 @@ import {
   Users,
   UserCircle2,
   X,
+  Sparkles,
 } from 'lucide-react'
 import './HomePage.css'
 
@@ -87,16 +88,163 @@ const TEMPLATE_CATEGORY_LIST = [
 ]
 
 const TEMPLATE_CARDS = [
-  { id: 't1', title: 'My Tasks | Trello', tone: 'template-orange', category: 'Popular' },
-  { id: 't2', title: 'New Hire Onboarding', tone: 'template-green', category: 'Human Resources' },
-  { id: 't3', title: 'Tier List', tone: 'template-blue', category: 'Education' },
-  { id: 't4', title: 'Innovation Weeks', tone: 'template-gold', category: 'Marketing' },
-  { id: 't5', title: 'Brand Guidelines', tone: 'template-teal', category: 'Design' },
-  { id: 't6', title: 'Small Biz CRM', tone: 'template-violet', category: 'Small business' },
-  { id: 't7', title: 'Sprint Board', tone: 'template-slate', category: 'Engineering-IT' },
-  { id: 't8', title: 'Sales Pipeline', tone: 'template-coral', category: 'Sales CRM' },
-  { id: 't9', title: 'Ops Checklist', tone: 'template-mint', category: 'Operations' },
+  {
+    id: 't1',
+    title: 'My Tasks | Trello',
+    tone: 'template-orange',
+    category: 'Popular',
+    backgroundColor: 'sunset',
+    lists: [
+      {
+        title: 'To do',
+        initialCards: [
+          { title: 'Plan my week', description: 'Review tasks and priorities for this week.' },
+          { title: 'Pay utility bills', description: 'Electricity and internet due this Friday.' },
+        ],
+      },
+      {
+        title: 'Doing',
+        initialCards: [{ title: 'Finish Trello clone', description: 'Template selection + board styling.' }],
+      },
+      { title: 'Done', initialCards: [{ title: 'Set monthly goals', description: 'Work, fitness, and learning.' }] },
+    ],
+  },
+  {
+    id: 't2',
+    title: 'New Hire Onboarding',
+    tone: 'template-green',
+    category: 'Human Resources',
+    backgroundColor: 'teal',
+    lists: [
+      {
+        title: 'Before Day 1',
+        initialCards: [
+          { title: 'Send welcome email', description: 'Share agenda and first-day expectations.' },
+          { title: 'Prepare laptop and accounts', description: 'Provision system access and credentials.' },
+        ],
+      },
+      {
+        title: 'Week 1',
+        initialCards: [{ title: 'Intro meetings', description: 'Schedule with manager and teammates.' }],
+      },
+      { title: 'Completed', initialCards: [{ title: 'Signed policy docs', description: 'All documents uploaded.' }] },
+    ],
+  },
+  {
+    id: 't3',
+    title: 'Tier List',
+    tone: 'template-blue',
+    category: 'Education',
+    backgroundColor: 'teal',
+    lists: [
+      { title: 'S Tier', initialCards: [{ title: 'Algorithms', description: 'Core high-priority concepts.' }] },
+      { title: 'A Tier', initialCards: [{ title: 'Databases', description: 'Indexing and transactions.' }] },
+      { title: 'B Tier', initialCards: [{ title: 'Networking', description: 'Protocols and reliability.' }] },
+    ],
+  },
+  {
+    id: 't4',
+    title: 'Innovation Weeks',
+    tone: 'template-gold',
+    category: 'Marketing',
+    backgroundColor: 'sunset',
+    lists: [
+      { title: 'Ideas', initialCards: [{ title: 'Community challenge', description: 'User-generated content week.' }] },
+      { title: 'Experimenting', initialCards: [{ title: 'Landing page A/B test', description: 'Measure signup lift.' }] },
+      { title: 'Launched', initialCards: [{ title: 'Referral campaign', description: 'Reward invite-based signups.' }] },
+    ],
+  },
+  {
+    id: 't5',
+    title: 'Brand Guidelines',
+    tone: 'template-teal',
+    category: 'Design',
+    backgroundColor: 'teal',
+    lists: [
+      { title: 'Research', initialCards: [{ title: 'Audit competitor branding', description: 'Collect tone and style references.' }] },
+      { title: 'Drafting', initialCards: [{ title: 'Color palette v2', description: 'Primary/secondary variants.' }] },
+      { title: 'Approved', initialCards: [{ title: 'Logo spacing rules', description: 'Ready for design handoff.' }] },
+    ],
+  },
+  {
+    id: 't6',
+    title: 'Small Biz CRM',
+    tone: 'template-violet',
+    category: 'Small business',
+    backgroundColor: 'violet',
+    lists: [
+      { title: 'Leads', initialCards: [{ title: 'Warm outreach list', description: 'Top 20 prospects from website forms.' }] },
+      { title: 'Negotiation', initialCards: [{ title: 'Acme proposal', description: 'Waiting for pricing approval.' }] },
+      { title: 'Won', initialCards: [{ title: 'Northwind deal', description: 'Contract signed and invoiced.' }] },
+    ],
+  },
+  {
+    id: 't7',
+    title: 'Sprint Board',
+    tone: 'template-slate',
+    category: 'Engineering-IT',
+    backgroundColor: 'violet',
+    lists: [
+      { title: 'Backlog', initialCards: [{ title: 'Refactor drag-and-drop', description: 'Improve card drop accuracy.' }] },
+      { title: 'In Progress', initialCards: [{ title: 'Add filter chips', description: 'Support multi-label filtering.' }] },
+      { title: 'Done', initialCards: [{ title: 'Set up API mocks', description: 'Fallback endpoints ready.' }] },
+    ],
+  },
+  {
+    id: 't8',
+    title: 'Sales Pipeline',
+    tone: 'template-coral',
+    category: 'Sales CRM',
+    backgroundColor: 'pink',
+    lists: [
+      { title: 'Prospects', initialCards: [{ title: 'Lead: FitLife', description: 'Inbound from webinar attendee.' }] },
+      { title: 'Qualified', initialCards: [{ title: 'Lead: StudioX', description: 'Budget and timeline confirmed.' }] },
+      { title: 'Closed', initialCards: [{ title: 'Lead: ByteWorks', description: 'Deal won this quarter.' }] },
+    ],
+  },
+  {
+    id: 't9',
+    title: 'Ops Checklist',
+    tone: 'template-mint',
+    category: 'Operations',
+    backgroundColor: 'teal',
+    lists: [
+      { title: 'Pending', initialCards: [{ title: 'Vendor renewal', description: 'Review contract terms and renewal date.' }] },
+      { title: 'In Review', initialCards: [{ title: 'Weekly metrics report', description: 'Validate dashboard anomalies.' }] },
+      { title: 'Completed', initialCards: [{ title: 'Backup verification', description: 'Restore test passed successfully.' }] },
+    ],
+  },
 ]
+
+const TEMPLATE_BOARD_TONES = {
+  'template-orange': 'sunset',
+  'template-green': 'teal',
+  'template-blue': 'teal',
+  'template-gold': 'sunset',
+  'template-teal': 'teal',
+  'template-violet': 'violet',
+  'template-slate': 'violet',
+  'template-coral': 'pink',
+  'template-mint': 'teal',
+}
+
+function buildTemplateColumns(template) {
+  return (template.lists ?? []).map((list, listIndex) => ({
+    id: `${template.id}-list-${listIndex}`,
+    title: list.title,
+    cards: (list.initialCards ?? []).map((card, cardIndex) => ({
+      id: `${template.id}-card-${listIndex}-${cardIndex}`,
+      title: card.title,
+      description: card.description ?? 'No description added yet.',
+      tags: [{ label: 'TEMPLATE', tone: 'blue' }],
+      dueDate: null,
+      commentList: [],
+      assignees: [],
+      checklist: [],
+      done: false,
+    })),
+  }))
+}
 
 function PopularTemplatesPanel({
   selectedCategory,
@@ -105,6 +253,7 @@ function PopularTemplatesPanel({
   isDismissed,
   onDismiss,
   templateIdPrefix,
+  onTemplateSelect,
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownWrapRef = useRef(null)
@@ -182,10 +331,26 @@ function PopularTemplatesPanel({
       </p>
       <div className="template-grid">
         {visibleTemplates.map((template) => (
-          <article key={`${templateIdPrefix}-template-${template.id}`} className="template-card">
+          <button
+            key={`${templateIdPrefix}-template-${template.id}`}
+            type="button"
+            className="template-card"
+            onClick={() => onTemplateSelect(template)}
+            aria-label={`Use ${template.title} template`}
+          >
             <span className={`template-cover ${template.tone}`} />
-            <p>{template.title}</p>
-          </article>
+            <div className="template-card-body">
+              <p>{template.title}</p>
+              <span className="template-card-meta">
+                {template.lists?.length ?? 0} lists •{' '}
+                {(template.lists ?? []).reduce((sum, list) => sum + (list.initialCards?.length ?? 0), 0)} cards
+              </span>
+              <span className="template-card-cta">
+                <Sparkles size={12} />
+                Use template
+              </span>
+            </div>
+          </button>
         ))}
       </div>
       <button type="button" className="browse-template-link">
@@ -246,6 +411,15 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
     onCreateBoard({ title, color: selectedBackground.boardTone })
     setIsCreateModalOpen(false)
     setNewBoardTitle('')
+  }
+
+  const handleTemplateSelect = (template) => {
+    const boardTone = template.backgroundColor ?? TEMPLATE_BOARD_TONES[template.tone] ?? 'violet'
+    onCreateBoard({
+      title: template.title,
+      color: boardTone,
+      columns: buildTemplateColumns(template),
+    })
   }
 
   return (
@@ -368,6 +542,7 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
                 isDismissed={templatesPromoDismissed}
                 onDismiss={() => setTemplatesPromoDismissed(true)}
                 templateIdPrefix="workspace"
+                onTemplateSelect={handleTemplateSelect}
               />
 
               <section className="boards-section">
@@ -403,6 +578,7 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
                 isDismissed={templatesPromoDismissed}
                 onDismiss={() => setTemplatesPromoDismissed(true)}
                 templateIdPrefix="boards"
+                onTemplateSelect={handleTemplateSelect}
               />
 
               <section className="boards-section">
