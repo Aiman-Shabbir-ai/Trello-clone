@@ -360,9 +360,12 @@ function PopularTemplatesPanel({
   )
 }
 
-export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
+export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpenTemplates }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [newBoardTitle, setNewBoardTitle] = useState('')
   const [selectedBackgroundId, setSelectedBackgroundId] = useState('img-night')
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('Popular')
@@ -371,6 +374,9 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
   const [isVisibilityOpen, setIsVisibilityOpen] = useState(false)
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true)
   const contentRef = useRef(null)
+  const searchWrapRef = useRef(null)
+  const notificationsRef = useRef(null)
+  const profileRef = useRef(null)
 
   const boardsToShow = useMemo(
     () => (recentBoards.length > 0 ? recentBoards : RECENT_BOARDS),
@@ -393,6 +399,29 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
     }
     return TEMPLATE_CARDS.filter((item) => item.category === selectedTemplateCategory)
   }, [selectedTemplateCategory])
+  const searchResults = useMemo(() => {
+    const normalized = searchQuery.trim().toLowerCase()
+    if (!normalized) {
+      return []
+    }
+    const boardMatches = RECENT_BOARDS.filter((board) =>
+      `${board.title} ${board.workspace}`.toLowerCase().includes(normalized)
+    ).map((board) => ({
+      id: `board-${board.id}`,
+      type: 'board',
+      title: board.title,
+      subtitle: board.workspace,
+    }))
+    const templateMatches = TEMPLATE_CARDS.filter((template) =>
+      `${template.title} ${template.category}`.toLowerCase().includes(normalized)
+    ).map((template) => ({
+      id: `template-${template.id}`,
+      type: 'template',
+      title: template.title,
+      subtitle: template.category,
+    }))
+    return [...boardMatches, ...templateMatches].slice(0, 8)
+  }, [searchQuery])
   const SelectedVisibilityIcon = selectedVisibility.icon
 
   useEffect(() => {
@@ -400,6 +429,23 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
       contentRef.current.scrollTop = 0
     }
   }, [activeSection])
+
+  useEffect(() => {
+    const onDocMouseDown = (event) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(event.target)) {
+        setSearchQuery('')
+      }
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+        setIsNotificationsOpen(false)
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [])
 
   const handleCreate = (event) => {
     event.preventDefault()
@@ -432,24 +478,81 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
           <div className="trello-mark" aria-hidden="true">
             T
           </div>
-          <div className="home-search">
+          <div className="home-search" ref={searchWrapRef}>
             <Search size={14} />
-            <input type="text" placeholder="Search" aria-label="Search" />
+            <input
+              type="text"
+              placeholder="Search"
+              aria-label="Search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+            />
+            {searchQuery.trim() ? (
+              <div className="topbar-floating-menu search-results-menu" role="listbox" aria-label="Search results">
+                {searchResults.length > 0 ? (
+                  searchResults.map((result) => (
+                    <button key={result.id} type="button" className="search-result-item">
+                      <strong>{result.title}</strong>
+                      <small>
+                        {result.type === 'board' ? 'Board' : 'Template'} • {result.subtitle}
+                      </small>
+                    </button>
+                  ))
+                ) : (
+                  <p className="search-empty-result">No matching boards or templates</p>
+                )}
+              </div>
+            ) : null}
           </div>
         </div>
         <div className="home-topbar-right">
           <button type="button" className="create-btn" onClick={() => setIsCreateModalOpen(true)}>
             Create
           </button>
-          <button type="button" className="top-icon-btn" aria-label="Notifications">
-            <Bell size={15} />
-          </button>
+          <div className="topbar-popover-wrap" ref={notificationsRef}>
+            <button
+              type="button"
+              className="top-icon-btn"
+              aria-label="Notifications"
+              onClick={() => setIsNotificationsOpen((current) => !current)}
+            >
+              <Bell size={15} />
+            </button>
+            {isNotificationsOpen ? (
+              <div className="topbar-floating-menu notifications-menu">
+                <h4>Notifications</h4>
+                <ul>
+                  <li>Unread mention in project roadmap</li>
+                  <li>Task due soon: Wireframes V1</li>
+                  <li>James moved a card to In Review</li>
+                </ul>
+              </div>
+            ) : null}
+          </div>
           <button type="button" className="top-icon-btn" aria-label="Help">
             <HelpCircle size={15} />
           </button>
-          <button type="button" className="top-icon-btn" aria-label="Account">
-            <UserCircle2 size={15} />
-          </button>
+          <div className="topbar-popover-wrap" ref={profileRef}>
+            <button
+              type="button"
+              className="top-icon-btn"
+              aria-label="Account"
+              onClick={() => setIsProfileOpen((current) => !current)}
+            >
+              <UserCircle2 size={15} />
+            </button>
+            {isProfileOpen ? (
+              <div className="topbar-floating-menu profile-menu">
+                <div className="profile-menu-header">
+                  <strong>Dhruv Sharma</strong>
+                  <small>dhruv.sharma@example.com</small>
+                </div>
+                <button type="button">Profile</button>
+                <button type="button">Settings</button>
+                <button type="button">Log out</button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </header>
 
@@ -466,7 +569,13 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard }) {
           <button
             type="button"
             className={`sidebar-item ${activeSection === 'templates' ? 'active' : ''}`}
-            onClick={() => setActiveSection('templates')}
+            onClick={() => {
+              if (onOpenTemplates) {
+                onOpenTemplates()
+                return
+              }
+              setActiveSection('templates')
+            }}
           >
             <Compass size={14} />
             Templates

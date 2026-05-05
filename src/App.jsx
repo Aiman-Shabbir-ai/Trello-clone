@@ -6,6 +6,7 @@ import { Header } from './components/Header'
 import { CardDetailsModal } from './components/CardDetailsModal'
 import { CreateCardModal } from './components/CreateCardModal'
 import { HomePage } from './components/HomePage'
+import { TemplateGallery } from './components/TemplateGallery'
 import { loadBoardState, saveBoardState } from './utils/boardStorage'
 import { fetchBoardState, updateBoardState } from './utils/boardApi'
 import { moveCardToIndex } from './utils/moveCard'
@@ -296,8 +297,13 @@ function App() {
         recentBoards={recentBoards}
         onOpenBoard={() => setActiveView('board')}
         onCreateBoard={onCreateBoard}
+        onOpenTemplates={() => setActiveView('templates')}
       />
     )
+  }
+
+  if (activeView === 'templates') {
+    return <TemplateGallery onGoHome={() => setActiveView('home')} />
   }
 
   return (
