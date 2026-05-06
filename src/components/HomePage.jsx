@@ -3,7 +3,9 @@ import {
   BadgeHelp,
   Bell,
   Bookmark,
+  Check,
   ChevronDown,
+  ChevronRight,
   Clock3,
   Compass,
   Globe2,
@@ -20,11 +22,17 @@ import {
   SquareKanban,
   UserRound,
   Users,
-  UserCircle2,
   X,
   Sparkles,
+  Moon,
+  MoreVertical,
 } from 'lucide-react'
 import './HomePage.css'
+import { AdvancedSearch } from './AdvancedSearch'
+import { AppStoreModal } from './AppStoreModal'
+import { AppSwitcherSidebar } from './AppSwitcherSidebar'
+import { WorkspaceMembers } from './WorkspaceMembers'
+import { WorkspaceSettings } from './WorkspaceSettings'
 
 const RECENT_BOARDS = [
   { id: 'b1', title: 'ParentsPlus', workspace: 'Trello Workspace', color: 'sunset' },
@@ -362,8 +370,12 @@ function PopularTemplatesPanel({
 
 export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpenTemplates }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const [isAppSwitcherOpen, setIsAppSwitcherOpen] = useState(false)
+  const [isAppStoreOpen, setIsAppStoreOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [searchTab, setSearchTab] = useState('trello')
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [newBoardTitle, setNewBoardTitle] = useState('')
@@ -374,6 +386,7 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
   const [isVisibilityOpen, setIsVisibilityOpen] = useState(false)
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true)
   const contentRef = useRef(null)
+  const appSwitcherRef = useRef(null)
   const searchWrapRef = useRef(null)
   const notificationsRef = useRef(null)
   const profileRef = useRef(null)
@@ -399,29 +412,6 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
     }
     return TEMPLATE_CARDS.filter((item) => item.category === selectedTemplateCategory)
   }, [selectedTemplateCategory])
-  const searchResults = useMemo(() => {
-    const normalized = searchQuery.trim().toLowerCase()
-    if (!normalized) {
-      return []
-    }
-    const boardMatches = RECENT_BOARDS.filter((board) =>
-      `${board.title} ${board.workspace}`.toLowerCase().includes(normalized)
-    ).map((board) => ({
-      id: `board-${board.id}`,
-      type: 'board',
-      title: board.title,
-      subtitle: board.workspace,
-    }))
-    const templateMatches = TEMPLATE_CARDS.filter((template) =>
-      `${template.title} ${template.category}`.toLowerCase().includes(normalized)
-    ).map((template) => ({
-      id: `template-${template.id}`,
-      type: 'template',
-      title: template.title,
-      subtitle: template.category,
-    }))
-    return [...boardMatches, ...templateMatches].slice(0, 8)
-  }, [searchQuery])
   const SelectedVisibilityIcon = selectedVisibility.icon
 
   useEffect(() => {
@@ -433,7 +423,10 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
   useEffect(() => {
     const onDocMouseDown = (event) => {
       if (searchWrapRef.current && !searchWrapRef.current.contains(event.target)) {
-        setSearchQuery('')
+        setIsSearchOpen(false)
+      }
+      if (appSwitcherRef.current && !appSwitcherRef.current.contains(event.target)) {
+        setIsAppSwitcherOpen(false)
       }
       if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
         setIsNotificationsOpen(false)
@@ -468,13 +461,34 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
     })
   }
 
+  const handleOpenAdvancedSearch = () => {
+    setIsSearchOpen(false)
+    setSearchTab('trello')
+    setActiveSection('search')
+  }
+
   return (
     <div className="home-page">
       <header className="home-topbar">
         <div className="home-topbar-left">
-          <button type="button" className="top-icon-btn" aria-label="Apps">
-            <LayoutGrid size={15} />
-          </button>
+          <div className="topbar-popover-wrap app-switcher-wrap" ref={appSwitcherRef}>
+            <button
+              type="button"
+              className="top-icon-btn"
+              aria-label="Apps"
+              onClick={() => setIsAppSwitcherOpen((open) => !open)}
+            >
+              <LayoutGrid size={15} />
+            </button>
+            {isAppSwitcherOpen ? (
+              <AppSwitcherSidebar
+                onOpenAppStore={() => {
+                  setIsAppSwitcherOpen(false)
+                  setIsAppStoreOpen(true)
+                }}
+              />
+            ) : null}
+          </div>
           <div className="trello-mark" aria-hidden="true">
             T
           </div>
@@ -486,20 +500,71 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
               aria-label="Search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
+              onFocus={() => setIsSearchOpen(true)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  handleOpenAdvancedSearch()
+                }
+              }}
             />
-            {searchQuery.trim() ? (
-              <div className="topbar-floating-menu search-results-menu" role="listbox" aria-label="Search results">
-                {searchResults.length > 0 ? (
-                  searchResults.map((result) => (
-                    <button key={result.id} type="button" className="search-result-item">
-                      <strong>{result.title}</strong>
-                      <small>
-                        {result.type === 'board' ? 'Board' : 'Template'} • {result.subtitle}
-                      </small>
+            {isSearchOpen ? (
+              <div className="topbar-floating-menu search-results-menu" role="dialog" aria-label="Search">
+                <div className="search-popover-tabs">
+                  <button
+                    type="button"
+                    className={searchTab === 'trello' ? 'active' : ''}
+                    onClick={() => setSearchTab('trello')}
+                  >
+                    Trello
+                  </button>
+                  <button
+                    type="button"
+                    className={searchTab === 'jira' ? 'active' : ''}
+                    onClick={() => setSearchTab('jira')}
+                  >
+                    Jira
+                  </button>
+                </div>
+
+                {searchTab === 'trello' ? (
+                  <div className="search-popover-trello">
+                    <p className="search-popover-heading">RECENT BOARDS</p>
+                    <div className="search-popover-board-list">
+                      {boardsToShow.slice(0, 6).map((board) => (
+                        <button
+                          key={`search-board-${board.id}`}
+                          type="button"
+                          className="search-popover-board-item"
+                          onClick={() => onOpenBoard(board)}
+                        >
+                          <span className={`search-popover-board-thumb ${board.color}`} />
+                          <span>
+                            <strong>{board.title}</strong>
+                            <small>Trello Workspace</small>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                    <button type="button" className="search-advanced-btn" onClick={handleOpenAdvancedSearch}>
+                      <Search size={14} />
+                      Advanced search
                     </button>
-                  ))
+                  </div>
                 ) : (
-                  <p className="search-empty-result">No matching boards or templates</p>
+                  <div className="search-popover-jira">
+                    <div className="search-popover-jira-empty">
+                      <Search size={48} />
+                      <p>Start searching to find your work</p>
+                    </div>
+                    <div className="search-popover-jira-footer">
+                      <span>Go to all:</span>
+                      <button type="button">Issues</button>
+                      <button type="button">Projects</button>
+                      <button type="button">Filters</button>
+                      <button type="button">People</button>
+                    </div>
+                  </div>
                 )}
               </div>
             ) : null}
@@ -520,12 +585,38 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
             </button>
             {isNotificationsOpen ? (
               <div className="topbar-floating-menu notifications-menu">
-                <h4>Notifications</h4>
-                <ul>
-                  <li>Unread mention in project roadmap</li>
-                  <li>Task due soon: Wireframes V1</li>
-                  <li>James moved a card to In Review</li>
-                </ul>
+                <div className="notifications-menu-header">
+                  <h4>Notifications</h4>
+                  <div className="notifications-controls">
+                    <label className="unread-toggle-wrap" htmlFor="unread-toggle">
+                      <span>Only show unread</span>
+                      <span className="unread-toggle active" aria-hidden="true">
+                        <Check size={11} />
+                      </span>
+                    </label>
+                    <input id="unread-toggle" type="checkbox" className="sr-only" checked readOnly />
+                    <button type="button" className="notifications-more-btn" aria-label="More options">
+                      <MoreVertical size={15} />
+                    </button>
+                  </div>
+                </div>
+                <div className="notifications-empty-state">
+                  <div className="notifications-empty-illustration" aria-hidden="true">
+                    <svg viewBox="0 0 180 110" role="img">
+                      <circle cx="22" cy="22" r="4" />
+                      <circle cx="40" cy="14" r="3" />
+                      <circle cx="154" cy="26" r="4" />
+                      <circle cx="142" cy="14" r="2.5" />
+                      <ellipse cx="90" cy="82" rx="53" ry="13" />
+                      <rect x="45" y="58" width="90" height="30" rx="15" />
+                      <circle cx="58" cy="64" r="10" />
+                      <circle cx="122" cy="64" r="10" />
+                      <circle cx="86" cy="66" r="2.5" />
+                      <circle cx="95" cy="66" r="2.5" />
+                    </svg>
+                  </div>
+                  <p>No unread notifications</p>
+                </div>
               </div>
             ) : null}
           </div>
@@ -535,21 +626,78 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
           <div className="topbar-popover-wrap" ref={profileRef}>
             <button
               type="button"
-              className="top-icon-btn"
+              className="top-icon-btn profile-trigger-btn"
               aria-label="Account"
               onClick={() => setIsProfileOpen((current) => !current)}
             >
-              <UserCircle2 size={15} />
+              <span className="profile-trigger-avatar">AS</span>
             </button>
             {isProfileOpen ? (
               <div className="topbar-floating-menu profile-menu">
-                <div className="profile-menu-header">
-                  <strong>Dhruv Sharma</strong>
-                  <small>dhruv.sharma@example.com</small>
+                <p className="profile-menu-section-label">ACCOUNT</p>
+                <div className="profile-summary">
+                  <div className="profile-summary-avatar-wrap">
+                    <span className="profile-summary-avatar">AS</span>
+                    <button type="button" className="profile-avatar-edit" aria-label="Edit profile picture">
+                      <Pencil size={11} />
+                    </button>
+                  </div>
+                  <div className="profile-summary-details">
+                    <strong>Ayman Shabir</strong>
+                    <p>
+                      aymanshabir44@gmail.com
+                      <Check size={12} />
+                    </p>
+                  </div>
                 </div>
-                <button type="button">Profile</button>
-                <button type="button">Settings</button>
-                <button type="button">Log out</button>
+                <div className="profile-menu-block">
+                  <button type="button" className="profile-menu-item">
+                    Switch accounts
+                  </button>
+                  <button type="button" className="profile-menu-item">
+                    Manage account
+                  </button>
+                </div>
+                <p className="profile-menu-section-label">TRELLO</p>
+                <div className="profile-menu-block">
+                  <button type="button" className="profile-menu-item">
+                    Profile and visibility
+                  </button>
+                  <button type="button" className="profile-menu-item">
+                    Activity
+                  </button>
+                  <button type="button" className="profile-menu-item">
+                    Cards
+                  </button>
+                  <button type="button" className="profile-menu-item">
+                    Settings
+                  </button>
+                  <button type="button" className="profile-menu-item profile-menu-item-labs">
+                    <span className="labs-pill">
+                      <Sparkles size={12} />
+                      <span>labs</span>
+                    </span>
+                    <Check size={12} />
+                  </button>
+                  <button type="button" className="profile-menu-item profile-menu-item-theme">
+                    <span>
+                      <Moon size={13} />
+                      Theme
+                    </span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+                <div className="profile-menu-block">
+                  <button type="button" className="profile-menu-item">
+                    Help
+                  </button>
+                  <button type="button" className="profile-menu-item">
+                    Shortcuts
+                  </button>
+                  <button type="button" className="profile-menu-item">
+                    Log out
+                  </button>
+                </div>
               </div>
             ) : null}
           </div>
@@ -606,15 +754,27 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
             </button>
             {isWorkspaceOpen && (
               <div className="workspace-panel">
-                <button type="button" className="workspace-link">
+                <button
+                  type="button"
+                  className={`workspace-link ${activeSection === 'boards' || activeSection === 'workspace' ? 'active' : ''}`}
+                  onClick={() => setActiveSection('boards')}
+                >
                   <SquareKanban size={14} />
                   Boards
                 </button>
-                <button type="button" className="workspace-link">
+                <button
+                  type="button"
+                  className={`workspace-link ${activeSection === 'members' ? 'active' : ''}`}
+                  onClick={() => setActiveSection('members')}
+                >
                   <Users size={14} />
                   Members
                 </button>
-                <button type="button" className="workspace-link">
+                <button
+                  type="button"
+                  className={`workspace-link ${activeSection === 'settings' ? 'active' : ''}`}
+                  onClick={() => setActiveSection('settings')}
+                >
                   <Settings size={14} />
                   Settings
                 </button>
@@ -630,7 +790,7 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
         </aside>
 
         <main className="workspace-content" ref={contentRef}>
-          {activeSection === 'workspace' ? (
+          {activeSection === 'workspace' || activeSection === 'boards' ? (
             <>
               <section className="workspace-header">
                 <div className="workspace-badge">T</div>
@@ -678,7 +838,11 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
                 </div>
               </section>
             </>
-          ) : activeSection === 'boards' || activeSection === 'templates' ? (
+          ) : activeSection === 'members' ? (
+            <WorkspaceMembers />
+          ) : activeSection === 'settings' ? (
+            <WorkspaceSettings />
+          ) : activeSection === 'templates' ? (
             <>
               <PopularTemplatesPanel
                 selectedCategory={selectedTemplateCategory}
@@ -766,6 +930,13 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
                 </button>
               </section>
             </>
+          ) : activeSection === 'search' ? (
+            <AdvancedSearch
+              searchQuery={searchQuery}
+              onSearchQueryChange={setSearchQuery}
+              boards={boardsToShow}
+              onOpenBoard={onOpenBoard}
+            />
           ) : (
             <div className="home-dashboard">
               <section className="home-hero">
@@ -960,6 +1131,10 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
           </form>
         </div>
       )}
+      {isProfileOpen ? (
+        <div className="account-menu-overlay" onClick={() => setIsProfileOpen(false)} role="presentation" />
+      ) : null}
+      {isAppStoreOpen ? <AppStoreModal onClose={() => setIsAppStoreOpen(false)} /> : null}
     </div>
   )
 }

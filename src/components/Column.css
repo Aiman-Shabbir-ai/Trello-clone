@@ -2,6 +2,8 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  max-height: 100%;
+  height: calc(100vh - 90px);
 }
 
 .column-header {
@@ -74,9 +76,13 @@
 }
 
 .column-cards {
+  flex: 1 1 auto;
+  min-height: 0;
   display: grid;
   gap: 0.7rem;
   align-content: start;
+  overflow-y: auto;
+  padding-right: 0.2rem;
 }
 
 .add-card-btn {
@@ -106,6 +112,19 @@
   outline: none;
   border-color: #8fb1df;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+}
+
+.column-cards::-webkit-scrollbar {
+  width: 8px;
+}
+
+.column-cards::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.column-cards::-webkit-scrollbar-thumb {
+  background: #d7e1ee;
+  border-radius: 999px;
 }
 
 .card-composer {
