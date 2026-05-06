@@ -1,4 +1,8 @@
-export function WorkspaceSettings() {
+export function WorkspaceSettings({ currentUser }) {
+  const handleUpgradeClick = () => {
+    window.open('https://trello.com/pricing', '_blank', 'noopener,noreferrer')
+  }
+
   const settingRows = [
     {
       id: 's1',
@@ -29,7 +33,7 @@ export function WorkspaceSettings() {
         <span className="workspace-settings-badge">T</span>
         <div>
           <h2>Workspace settings</h2>
-          <p>Trello Workspace</p>
+          <p>{currentUser?.workspaceName ?? 'Trello Workspace'}</p>
         </div>
       </header>
 
@@ -65,6 +69,7 @@ export function WorkspaceSettings() {
               <button
                 type="button"
                 className={`settings-row-action ${row.actionTone === 'upgrade' ? 'upgrade' : 'change'}`}
+                onClick={row.actionTone === 'upgrade' ? handleUpgradeClick : undefined}
               >
                 {row.actionLabel}
               </button>

@@ -1,13 +1,17 @@
 const STORAGE_KEY = 'trello-clone-board-v2'
 
-export function loadBoardState(fallback) {
+function getScopedStorageKey(scopeKey) {
+  return scopeKey ? `${STORAGE_KEY}:${scopeKey}` : STORAGE_KEY
+}
+
+export function loadBoardState(fallback, scopeKey = '') {
   const base = {
     columns: fallback.columns,
     boardTitle: fallback.boardTitle ?? 'Board',
     backgroundColor: fallback.backgroundColor ?? 'violet',
   }
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(getScopedStorageKey(scopeKey))
     if (!raw) {
       return base
     }
@@ -29,9 +33,12 @@ export function loadBoardState(fallback) {
   }
 }
 
-export function saveBoardState(columns, boardTitle, backgroundColor = 'violet') {
+export function saveBoardState(columns, boardTitle, backgroundColor = 'violet', scopeKey = '') {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ columns, boardTitle, backgroundColor }))
+    localStorage.setItem(
+      getScopedStorageKey(scopeKey),
+      JSON.stringify({ columns, boardTitle, backgroundColor })
+    )
   } catch {
     // ignore quota / private mode
   }

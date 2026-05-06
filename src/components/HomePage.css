@@ -87,7 +87,7 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  z-index: 130;
+  z-index: 260;
   background: #ffffff;
   color: #172b4d;
   border-radius: 10px;
@@ -1829,6 +1829,12 @@
   font-weight: 600;
   padding: 0.42rem 0.72rem;
   cursor: pointer;
+}
+
+.members-invite-hint {
+  margin: -0.35rem 0 0.6rem;
+  color: #22a06b;
+  font-size: 0.74rem;
 }
 
 .members-list-wrap {

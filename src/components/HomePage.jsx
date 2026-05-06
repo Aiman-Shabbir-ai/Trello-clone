@@ -368,7 +368,14 @@ function PopularTemplatesPanel({
   )
 }
 
-export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpenTemplates }) {
+export function HomePage({
+  currentUser,
+  recentBoards = [],
+  onOpenBoard,
+  onCreateBoard,
+  onOpenTemplates,
+  onLogout,
+}) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isAppSwitcherOpen, setIsAppSwitcherOpen] = useState(false)
   const [isAppStoreOpen, setIsAppStoreOpen] = useState(false)
@@ -391,10 +398,21 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
   const notificationsRef = useRef(null)
   const profileRef = useRef(null)
 
-  const boardsToShow = useMemo(
-    () => (recentBoards.length > 0 ? recentBoards : RECENT_BOARDS),
-    [recentBoards]
-  )
+  const boardsToShow = useMemo(() => {
+    if (recentBoards.length > 0) {
+      return recentBoards
+    }
+    const workspaceName = currentUser?.workspaceName ?? 'Trello Workspace'
+    return RECENT_BOARDS.map((board) => ({ ...board, workspace: workspaceName }))
+  }, [recentBoards, currentUser])
+  const userInitials = useMemo(() => {
+    const source = currentUser?.fullName?.trim() || currentUser?.email?.trim() || 'User'
+    const parts = source.split(/\s+/).filter(Boolean)
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase()
+    }
+    return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase()
+  }, [currentUser])
   const selectedBackground = useMemo(
     () =>
       [...BACKGROUND_IMAGE_PRESETS, ...BACKGROUND_COLOR_PRESETS].find(
@@ -465,6 +483,10 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
     setIsSearchOpen(false)
     setSearchTab('trello')
     setActiveSection('search')
+  }
+
+  const handleUpgradeClick = () => {
+    window.open('https://trello.com/pricing', '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -630,22 +652,22 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
               aria-label="Account"
               onClick={() => setIsProfileOpen((current) => !current)}
             >
-              <span className="profile-trigger-avatar">AS</span>
+              <span className="profile-trigger-avatar">{userInitials}</span>
             </button>
             {isProfileOpen ? (
               <div className="topbar-floating-menu profile-menu">
                 <p className="profile-menu-section-label">ACCOUNT</p>
                 <div className="profile-summary">
                   <div className="profile-summary-avatar-wrap">
-                    <span className="profile-summary-avatar">AS</span>
+                    <span className="profile-summary-avatar">{userInitials}</span>
                     <button type="button" className="profile-avatar-edit" aria-label="Edit profile picture">
                       <Pencil size={11} />
                     </button>
                   </div>
                   <div className="profile-summary-details">
-                    <strong>Ayman Shabir</strong>
+                    <strong>{currentUser?.fullName ?? 'User'}</strong>
                     <p>
-                      aymanshabir44@gmail.com
+                      {currentUser?.email ?? 'user@example.com'}
                       <Check size={12} />
                     </p>
                   </div>
@@ -688,13 +710,38 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
                   </button>
                 </div>
                 <div className="profile-menu-block">
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      window.open('https://support.atlassian.com/trello/', '_blank', 'noopener,noreferrer')
+                    }}
+                  >
                     Help
                   </button>
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      setActiveSection('home')
+                    }}
+                  >
                     Shortcuts
                   </button>
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      if (onLogout) {
+                        onLogout()
+                        return
+                      }
+                      setActiveSection('home')
+                    }}
+                  >
                     Log out
                   </button>
                 </div>
@@ -839,9 +886,9 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
               </section>
             </>
           ) : activeSection === 'members' ? (
-            <WorkspaceMembers />
+            <WorkspaceMembers currentUser={currentUser} />
           ) : activeSection === 'settings' ? (
-            <WorkspaceSettings />
+            <WorkspaceSettings currentUser={currentUser} />
           ) : activeSection === 'templates' ? (
             <>
               <PopularTemplatesPanel
@@ -885,7 +932,7 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
                     <button type="button">Boards</button>
                     <button type="button">Members</button>
                     <button type="button">Settings</button>
-                    <button type="button" className="upgrade-pill">
+                    <button type="button" className="upgrade-pill" onClick={handleUpgradeClick}>
                       Upgrade
                     </button>
                   </div>
@@ -1109,7 +1156,7 @@ export function HomePage({ recentBoards = [], onOpenBoard, onCreateBoard, onOpen
                 For unlimited boards, upgrade your Workspace.
               </small>
             </div>
-            <button type="button" className="upgrade-action">
+            <button type="button" className="upgrade-action" onClick={handleUpgradeClick}>
               <Plus size={14} />
               Upgrade
             </button>

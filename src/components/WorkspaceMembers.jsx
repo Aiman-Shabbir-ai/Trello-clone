@@ -1,10 +1,35 @@
-export function WorkspaceMembers() {
+import { useState } from 'react'
+
+export function WorkspaceMembers({ currentUser }) {
+  const [inviteHint, setInviteHint] = useState('')
+
+  const handleUpgradeClick = () => {
+    window.open('https://trello.com/pricing', '_blank', 'noopener,noreferrer')
+  }
+
+  const handleInviteMembers = async () => {
+    const inviteLink = `${window.location.origin}/invite/trello-workspace`
+    try {
+      await navigator.clipboard.writeText(inviteLink)
+      setInviteHint('Invite link copied')
+    } catch {
+      setInviteHint('Copy blocked in this browser')
+    }
+    window.setTimeout(() => setInviteHint(''), 2200)
+  }
+
   const memberRows = [
     {
       id: 'm1',
-      initials: 'AS',
-      name: 'Ayman Shabir',
-      username: '@aymanshabir44',
+      initials:
+        currentUser?.fullName
+          ?.split(' ')
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) => part[0]?.toUpperCase() ?? '')
+          .join('') || 'U',
+      name: currentUser?.fullName ?? 'Workspace User',
+      username: `@${(currentUser?.email ?? 'user').split('@')[0]}`,
       lastActive: 'Last active 2m ago',
       boards: 7,
       role: 'Admin',
@@ -25,7 +50,7 @@ export function WorkspaceMembers() {
           <h2>Collaborators (1/10)</h2>
           <p>Upgrade your Workspace plan to unlock advanced permissions and controls.</p>
         </div>
-        <button type="button" className="members-upgrade-btn">
+        <button type="button" className="members-upgrade-btn" onClick={handleUpgradeClick}>
           Upgrade
         </button>
       </header>
@@ -43,10 +68,11 @@ export function WorkspaceMembers() {
           Filter by name
         </label>
         <input id="workspace-member-filter" type="text" placeholder="Filter by name" />
-        <button type="button" className="invite-members-btn">
+        <button type="button" className="invite-members-btn" onClick={handleInviteMembers}>
           Invite Workspace members
         </button>
       </div>
+      {inviteHint ? <p className="members-invite-hint">{inviteHint}</p> : null}
 
       <div className="members-list-wrap">
         <div className="members-list-head">

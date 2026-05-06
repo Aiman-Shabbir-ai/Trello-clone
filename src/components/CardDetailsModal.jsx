@@ -127,11 +127,11 @@ export function CardDetailsModal({ selection, columns, onClose, onUpdateCard, on
     window.setTimeout(() => setCopyHint(''), 2200)
   }
 
-  const handleMove = () => {
-    if (!moveTargetId || moveTargetId === columnId) {
+  const handleMove = (targetColumnId = moveTargetId) => {
+    if (!targetColumnId || targetColumnId === columnId) {
       return
     }
-    onMoveCard(card.id, columnId, moveTargetId)
+    onMoveCard(card.id, columnId, targetColumnId)
     setMoveTargetId('')
     onClose()
   }
@@ -282,7 +282,11 @@ export function CardDetailsModal({ selection, columns, onClose, onUpdateCard, on
                 <select
                   id="move-list-select"
                   value={moveTargetId}
-                  onChange={(event) => setMoveTargetId(event.target.value)}
+                  onChange={(event) => {
+                    const targetId = event.target.value
+                    setMoveTargetId(targetId)
+                    handleMove(targetId)
+                  }}
                 >
                   <option value="">Move to…</option>
                   {columns
