@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { boardData } from './data/boardData'
 import { Board } from './components/Board'
@@ -8,12 +8,11 @@ import { CreateCardModal } from './components/CreateCardModal'
 import { AuthScreen } from './components/AuthScreen'
 import { HomePage } from './components/HomePage'
 import { TemplateGallery } from './components/TemplateGallery'
-import { loadBoardState, saveBoardState } from './utils/boardStorage'
-import { fetchBoardState, updateBoardState } from './utils/boardApi'
+import { clearStoredToken, loginUser, registerUser } from './utils/authApi'
+import { createBoard, getBoards, updateBoard } from './utils/boardApi'
 import { moveCardToIndex } from './utils/moveCard'
 
 const AUTH_SESSION_KEY = 'trello-clone-session-user'
-const USERS_STORAGE_KEY = 'trello-clone-users'
 const BOARD_BACKGROUND_STYLES = {
   sunset: 'linear-gradient(135deg, #f97316 0%, #fb7185 100%)',
   violet: 'linear-gradient(135deg, #4f46e5 0%, #a855f7 100%)',
@@ -51,30 +50,23 @@ function getStarterColumns() {
 }
 
 function App() {
-  const sessionEmail =
-    typeof window !== 'undefined' ? localStorage.getItem(AUTH_SESSION_KEY)?.toLowerCase() ?? '' : ''
+  const [isBoardsLoading, setIsBoardsLoading] = useState(false)
+  const [boardsError, setBoardsError] = useState('')
+  const [boardId, setBoardId] = useState('')
   const [currentUser, setCurrentUser] = useState(() => {
-    if (!sessionEmail) {
-      return null
-    }
     try {
-      const users = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) ?? '{}')
-      return users[sessionEmail] ?? null
+      const raw = localStorage.getItem(AUTH_SESSION_KEY)
+      return raw ? JSON.parse(raw) : null
     } catch {
       return null
     }
   })
-
-  const getUserBoardState = () => loadBoardState(boardData, currentUser?.email ?? '')
-
-  const initialBoard = getUserBoardState()
-  const userInitializedBoardRef = useRef(false)
   const [activeView, setActiveView] = useState('home')
   const [recentBoards, setRecentBoards] = useState([])
-  const [columns, setColumns] = useState(() => initialBoard.columns)
-  const [boardTitle, setBoardTitle] = useState(() => initialBoard.boardTitle)
+  const [columns, setColumns] = useState(() => boardData.columns)
+  const [boardTitle, setBoardTitle] = useState(() => boardData.boardTitle)
   const [boardBackgroundColor, setBoardBackgroundColor] = useState(
-    () => initialBoard.backgroundColor ?? 'violet'
+    () => boardData.backgroundColor ?? 'violet'
   )
   const [isRemoteLoaded, setIsRemoteLoaded] = useState(false)
   const [selection, setSelection] = useState(null)
@@ -82,53 +74,80 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterLabels, setFilterLabels] = useState([])
 
+  const applyBoardState = (board) => {
+    if (!board) {
+      return
+    }
+    setBoardId(board._id)
+    setColumns(board.columns ?? [])
+    setBoardTitle(board.boardTitle ?? 'Board')
+    setBoardBackgroundColor(board.backgroundColor ?? 'violet')
+  }
+
+  const mapBoardPreview = (board) => ({
+    id: board._id,
+    title: board.boardTitle ?? 'Untitled board',
+    workspace: currentUser?.workspaceName ?? 'Trello Workspace',
+    color: board.backgroundColor ?? 'violet',
+    columns: board.columns ?? [],
+  })
+
+  const handleUnauthorized = useCallback((error) => {
+    if (error?.status !== 401) {
+      return false
+    }
+    clearStoredToken()
+    localStorage.removeItem(AUTH_SESSION_KEY)
+    setCurrentUser(null)
+    return true
+  }, [])
+
   useEffect(() => {
-    const scopedBoard = loadBoardState(boardData, currentUser?.email ?? '')
-    setColumns(scopedBoard.columns)
-    setBoardTitle(scopedBoard.boardTitle)
-    setBoardBackgroundColor(scopedBoard.backgroundColor ?? 'violet')
+    setColumns(boardData.columns)
+    setBoardTitle(boardData.boardTitle)
+    setBoardBackgroundColor(boardData.backgroundColor ?? 'violet')
+    setBoardId('')
     setActiveView('home')
     setSelection(null)
     setCreateCardColumnId(null)
     setSearchQuery('')
     setFilterLabels([])
     setRecentBoards([])
+    setBoardsError('')
+    setIsBoardsLoading(false)
+    setIsRemoteLoaded(false)
   }, [currentUser?.email])
 
   useEffect(() => {
     if (!currentUser?.email) {
-      setIsRemoteLoaded(true)
-      return
-    }
-
-    const scopedKey = `trello-clone-board-v2:${currentUser.email}`
-    if (localStorage.getItem(scopedKey)) {
-      setIsRemoteLoaded(true)
       return
     }
 
     let isCancelled = false
 
-    fetchBoardState()
-      .then((remoteState) => {
-        if (isCancelled || userInitializedBoardRef.current) {
+    setIsBoardsLoading(true)
+    setBoardsError('')
+    getBoards()
+      .then((remoteBoards) => {
+        if (isCancelled) {
           return
         }
-        setColumns(remoteState.columns)
-        setBoardTitle(remoteState.boardTitle)
-        setBoardBackgroundColor(remoteState.backgroundColor ?? 'violet')
-        saveBoardState(
-          remoteState.columns,
-          remoteState.boardTitle,
-          remoteState.backgroundColor ?? 'violet',
-          currentUser.email
-        )
+        const normalizedBoards = Array.isArray(remoteBoards) ? remoteBoards : []
+        setRecentBoards(normalizedBoards.map(mapBoardPreview))
+        const existingBoard = normalizedBoards[0] ?? null
+        if (existingBoard) {
+          applyBoardState(existingBoard)
+        }
       })
-      .catch(() => {
-        // Keep local fallback when API is unavailable
+      .catch((error) => {
+        if (isCancelled || handleUnauthorized(error)) {
+          return
+        }
+        setBoardsError(error.message || 'Failed to load boards')
       })
       .finally(() => {
         if (!isCancelled) {
+          setIsBoardsLoading(false)
           setIsRemoteLoaded(true)
         }
       })
@@ -146,12 +165,17 @@ function App() {
     if (!currentUser?.email) {
       return
     }
+    if (!boardId) {
+      return
+    }
 
-    saveBoardState(columns, boardTitle, boardBackgroundColor, currentUser.email)
-    updateBoardState({ columns, boardTitle, backgroundColor: boardBackgroundColor }).catch(() => {
-      // Local copy is still saved; API can recover later.
+    updateBoard(boardId, { columns, boardTitle, backgroundColor: boardBackgroundColor }).catch((error) => {
+      if (handleUnauthorized(error)) {
+        return
+      }
+      // Keep UI responsive; next successful sync will persist state.
     })
-  }, [columns, boardTitle, boardBackgroundColor, isRemoteLoaded, currentUser?.email])
+  }, [columns, boardTitle, boardBackgroundColor, isRemoteLoaded, currentUser?.email, boardId])
 
   const selectedCardView = useMemo(() => {
     if (!selection) {
@@ -324,48 +348,58 @@ function App() {
 
   const isBoardFiltered = totalCards !== visibleCards
 
-  const onCreateBoard = ({ title, color, columns: templateColumns }) => {
-    userInitializedBoardRef.current = true
+  const onCreateBoard = async ({ title, color, columns: templateColumns }) => {
     const nextColor = color ?? 'violet'
-    setBoardTitle(title)
-    setBoardBackgroundColor(nextColor)
-    setColumns(
-      Array.isArray(templateColumns) && templateColumns.length > 0 ? templateColumns : getStarterColumns()
-    )
+    const payload = {
+      boardTitle: title,
+      backgroundColor: nextColor,
+      columns:
+        Array.isArray(templateColumns) && templateColumns.length > 0 ? templateColumns : getStarterColumns(),
+    }
+
+    const createdBoard = await createBoard(payload).catch((error) => {
+      if (handleUnauthorized(error)) {
+        return null
+      }
+      throw error
+    })
+    if (!createdBoard) {
+      return
+    }
+
+    applyBoardState(createdBoard)
     setSelection(null)
     setCreateCardColumnId(null)
     setSearchQuery('')
     setFilterLabels([])
     setActiveView('board')
-    const workspaceName = currentUser?.workspaceName ?? 'Trello Workspace'
-    setRecentBoards((prev) => [
-      { id: newId('recent'), title, workspace: workspaceName, color: nextColor },
-      ...prev.filter((board) => board.title !== title),
-    ])
+    setRecentBoards((prev) => [mapBoardPreview(createdBoard), ...prev.filter((board) => board.id !== createdBoard._id)])
   }
 
-  const onAuthenticate = ({ fullName, email, mode }) => {
-    const displayName =
-      fullName || email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
-    const user = {
-      email,
-      fullName: displayName,
-      workspaceName: `${displayName.split(' ')[0]} Workspace`,
+  const onAuthenticate = async ({ fullName, email, password, mode }) => {
+    const payload =
+      mode === 'signup'
+        ? await registerUser({ name: fullName || email.split('@')[0], email, password })
+        : await loginUser({ email, password })
+
+    const backendUser = payload?.user
+    if (!backendUser?.email) {
+      throw new Error('Invalid auth response from server')
     }
 
-    try {
-      const existingUsers = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) ?? '{}')
-      const nextUsers =
-        mode === 'signup' || !existingUsers[email] ? { ...existingUsers, [email]: user } : existingUsers
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(nextUsers))
-    } catch {
-      // fallback to in-memory auth if storage is blocked
+    const user = {
+      id: backendUser.id,
+      email: backendUser.email,
+      fullName: backendUser.name,
+      workspaceName: `${backendUser.name.split(' ')[0]} Workspace`,
     }
-    localStorage.setItem(AUTH_SESSION_KEY, email)
+
+    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(user))
     setCurrentUser(user)
   }
 
   const onLogout = () => {
+    clearStoredToken()
     localStorage.removeItem(AUTH_SESSION_KEY)
     setCurrentUser(null)
   }
@@ -379,7 +413,16 @@ function App() {
       <HomePage
         currentUser={currentUser}
         recentBoards={recentBoards}
-        onOpenBoard={() => setActiveView('board')}
+        isLoadingBoards={isBoardsLoading}
+        boardsError={boardsError}
+        onOpenBoard={(board) => {
+          setBoardsError('')
+          setBoardId(board.id)
+          setColumns(board.columns ?? [])
+          setBoardTitle(board.title ?? 'Board')
+          setBoardBackgroundColor(board.color ?? 'violet')
+          setActiveView('board')
+        }}
         onCreateBoard={onCreateBoard}
         onOpenTemplates={() => setActiveView('templates')}
         onLogout={onLogout}

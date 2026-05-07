@@ -371,6 +371,8 @@ function PopularTemplatesPanel({
 export function HomePage({
   currentUser,
   recentBoards = [],
+  isLoadingBoards = false,
+  boardsError = '',
   onOpenBoard,
   onCreateBoard,
   onOpenTemplates,
@@ -389,6 +391,7 @@ export function HomePage({
   const [selectedBackgroundId, setSelectedBackgroundId] = useState('img-night')
   const [selectedTemplateCategory, setSelectedTemplateCategory] = useState('Popular')
   const [templatesPromoDismissed, setTemplatesPromoDismissed] = useState(false)
+  const [createError, setCreateError] = useState('')
   const [visibility, setVisibility] = useState('workspace')
   const [isVisibilityOpen, setIsVisibilityOpen] = useState(false)
   const [isWorkspaceOpen, setIsWorkspaceOpen] = useState(true)
@@ -458,25 +461,35 @@ export function HomePage({
     return () => document.removeEventListener('mousedown', onDocMouseDown)
   }, [])
 
-  const handleCreate = (event) => {
+  const handleCreate = async (event) => {
     event.preventDefault()
+    setCreateError('')
     const title = newBoardTitle.trim()
     if (!title) {
       return
     }
 
-    onCreateBoard({ title, color: selectedBackground.boardTone })
-    setIsCreateModalOpen(false)
-    setNewBoardTitle('')
+    try {
+      await onCreateBoard({ title, color: selectedBackground.boardTone })
+      setIsCreateModalOpen(false)
+      setNewBoardTitle('')
+    } catch (error) {
+      setCreateError(error.message || 'Failed to create board')
+    }
   }
 
-  const handleTemplateSelect = (template) => {
+  const handleTemplateSelect = async (template) => {
+    setCreateError('')
     const boardTone = template.backgroundColor ?? TEMPLATE_BOARD_TONES[template.tone] ?? 'violet'
-    onCreateBoard({
-      title: template.title,
-      color: boardTone,
-      columns: buildTemplateColumns(template),
-    })
+    try {
+      await onCreateBoard({
+        title: template.title,
+        color: boardTone,
+        columns: buildTemplateColumns(template),
+      })
+    } catch (error) {
+      setCreateError(error.message || 'Failed to create board from template')
+    }
   }
 
   const handleOpenAdvancedSearch = () => {
@@ -866,6 +879,8 @@ export function HomePage({
                   <UserRound size={16} />
                   Your boards
                 </h3>
+                {isLoadingBoards ? <p>Loading boards...</p> : null}
+                {boardsError ? <p className="field-error">{boardsError}</p> : null}
                 <div className="board-grid">
                   {boardsToShow.map((board) => (
                     <button
@@ -1160,6 +1175,7 @@ export function HomePage({
               <Plus size={14} />
               Upgrade
             </button>
+            {createError ? <p className="field-error">{createError}</p> : null}
             <div className="create-board-actions stacked">
               <button
                 type="submit"

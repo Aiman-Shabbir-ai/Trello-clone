@@ -1,37 +1,59 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:4000'
-const BOARD_ENDPOINT = `${API_BASE_URL}/board`
+import { clearStoredToken, getStoredToken } from './authApi'
 
-function isValidBoardState(value) {
-  return Boolean(
-    value &&
-      typeof value.boardTitle === 'string' &&
-      Array.isArray(value.columns) &&
-      (typeof value.backgroundColor === 'undefined' || typeof value.backgroundColor === 'string')
-  )
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000'
+const BOARDS_ENDPOINT = `${API_BASE_URL}/api/boards`
+
+function buildAuthHeaders(extraHeaders = {}) {
+  const token = getStoredToken()
+  return {
+    ...extraHeaders,
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
 }
 
-export async function fetchBoardState() {
-  const response = await fetch(BOARD_ENDPOINT)
+async function parseResponse(response) {
+  const data = await response.json().catch(() => ({}))
   if (!response.ok) {
-    throw new Error(`Failed to load board: ${response.status}`)
+    const error = new Error(data.message || `Request failed with status ${response.status}`)
+    error.status = response.status
+    if (response.status === 401) {
+      clearStoredToken()
+      localStorage.removeItem('trello-clone-session-user')
+    }
+    throw error
   }
-
-  const payload = await response.json()
-  if (!isValidBoardState(payload)) {
-    throw new Error('Invalid board payload from API')
-  }
-
-  return payload
+  return data
 }
 
-export async function updateBoardState(boardState) {
-  const response = await fetch(BOARD_ENDPOINT, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(boardState),
+export async function getBoards() {
+  const response = await fetch(BOARDS_ENDPOINT, {
+    headers: buildAuthHeaders(),
   })
+  return parseResponse(response)
+}
 
-  if (!response.ok) {
-    throw new Error(`Failed to save board: ${response.status}`)
-  }
+export async function createBoard(payload) {
+  const response = await fetch(BOARDS_ENDPOINT, {
+    method: 'POST',
+    headers: buildAuthHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  })
+  return parseResponse(response)
+}
+
+export async function updateBoard(boardId, payload) {
+  const response = await fetch(`${BOARDS_ENDPOINT}/${boardId}`, {
+    method: 'PUT',
+    headers: buildAuthHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(payload),
+  })
+  return parseResponse(response)
+}
+
+export async function deleteBoard(boardId) {
+  const response = await fetch(`${BOARDS_ENDPOINT}/${boardId}`, {
+    method: 'DELETE',
+    headers: buildAuthHeaders(),
+  })
+  return parseResponse(response)
 }

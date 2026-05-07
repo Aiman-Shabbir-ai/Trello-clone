@@ -5,21 +5,32 @@ export function AuthScreen({ onAuthenticate }) {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const heading = mode === 'signin' ? 'Log in to continue' : 'Create your account'
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    setErrorMessage('')
     const normalizedEmail = email.trim().toLowerCase()
     if (!normalizedEmail || !password.trim()) {
       return
     }
-    onAuthenticate({
-      fullName: fullName.trim(),
-      email: normalizedEmail,
-      password: password.trim(),
-      mode,
-    })
+    setIsSubmitting(true)
+    try {
+      await onAuthenticate({
+        fullName: fullName.trim(),
+        email: normalizedEmail,
+        password: password.trim(),
+        mode,
+      })
+    } catch (error) {
+      setErrorMessage(error.message || 'Authentication failed')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -51,17 +62,27 @@ export function AuthScreen({ onAuthenticate }) {
         </label>
         <label>
           Password
-          <input
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+          <div className="password-input-row">
+            <input
+              type={isPasswordVisible ? 'text' : 'password'}
+              placeholder="Enter password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="password-visibility-btn"
+              onClick={() => setIsPasswordVisible((current) => !current)}
+            >
+              {isPasswordVisible ? 'Hide' : 'Show'}
+            </button>
+          </div>
         </label>
-        <button type="submit" className="auth-submit-btn">
-          {mode === 'signin' ? 'Continue' : 'Create account'}
+        <button type="submit" className="auth-submit-btn" disabled={isSubmitting}>
+          {isSubmitting ? 'Please wait...' : mode === 'signin' ? 'Continue' : 'Create account'}
         </button>
+        {errorMessage ? <p className="auth-error-text">{errorMessage}</p> : null}
         <button
           type="button"
           className="auth-switch-btn"

@@ -61,6 +61,36 @@
   padding: 0.48rem 0.6rem;
 }
 
+.password-input-row {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.password-input-row input {
+  flex: 1;
+}
+
+.password-visibility-btn {
+  border: 1px solid #475569;
+  border-radius: 10px;
+  background: #111f38;
+  color: #cbd5e1;
+  padding: 0.48rem 0.62rem;
+  font-size: 0.76rem;
+  cursor: pointer;
+}
+
+.password-visibility-btn:hover {
+  background: #17294a;
+}
+
+.password-visibility-btn:focus-visible {
+  outline: none;
+  border-color: #579dff;
+  box-shadow: 0 0 0 2px rgba(87, 157, 255, 0.25);
+}
+
 .auth-card input:focus-visible {
   outline: none;
   border-color: #579dff;
@@ -75,6 +105,17 @@
   font-weight: 700;
   padding: 0.5rem 0.7rem;
   cursor: pointer;
+}
+
+.auth-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-error-text {
+  margin: -0.2rem 0 0;
+  color: #fda4af;
+  font-size: 0.76rem;
 }
 
 .auth-switch-btn {
