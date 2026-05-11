@@ -589,6 +589,22 @@
   stroke-width: 2.7;
 }
 
+.profile-menu-divider {
+  height: 1px;
+  background: #2f3541;
+  margin: 0;
+}
+
+.profile-menu-item-logout {
+  gap: 0.5rem;
+  justify-content: flex-start;
+  color: #dfe1e6;
+}
+
+.profile-menu-item-logout:hover {
+  background: #2a313d;
+}
+
 .account-menu-overlay {
   position: fixed;
   inset: 0;

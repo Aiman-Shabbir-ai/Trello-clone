@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   BadgeHelp,
   Bell,
@@ -15,6 +16,7 @@ import {
   LayoutGrid,
   LayoutTemplate,
   Lock,
+  LogOut,
   Pencil,
   Settings,
   Plus,
@@ -378,6 +380,7 @@ export function HomePage({
   onOpenTemplates,
   onLogout,
 }) {
+  const navigate = useNavigate()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isAppSwitcherOpen, setIsAppSwitcherOpen] = useState(false)
   const [isAppStoreOpen, setIsAppStoreOpen] = useState(false)
@@ -673,7 +676,15 @@ export function HomePage({
                 <div className="profile-summary">
                   <div className="profile-summary-avatar-wrap">
                     <span className="profile-summary-avatar">{userInitials}</span>
-                    <button type="button" className="profile-avatar-edit" aria-label="Edit profile picture">
+                    <button
+                      type="button"
+                      className="profile-avatar-edit"
+                      aria-label="Edit profile picture"
+                      onClick={() => {
+                        setIsProfileOpen(false)
+                        console.log('clicked Edit profile picture')
+                      }}
+                    >
                       <Pencil size={11} />
                     </button>
                   </div>
@@ -686,35 +697,91 @@ export function HomePage({
                   </div>
                 </div>
                 <div className="profile-menu-block">
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Switch accounts')
+                    }}
+                  >
                     Switch accounts
                   </button>
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Manage account')
+                    }}
+                  >
                     Manage account
                   </button>
                 </div>
                 <p className="profile-menu-section-label">TRELLO</p>
                 <div className="profile-menu-block">
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Profile and visibility')
+                    }}
+                  >
                     Profile and visibility
                   </button>
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Activity')
+                    }}
+                  >
                     Activity
                   </button>
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Cards')
+                    }}
+                  >
                     Cards
                   </button>
-                  <button type="button" className="profile-menu-item">
+                  <button
+                    type="button"
+                    className="profile-menu-item"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Settings')
+                    }}
+                  >
                     Settings
                   </button>
-                  <button type="button" className="profile-menu-item profile-menu-item-labs">
+                  <button
+                    type="button"
+                    className="profile-menu-item profile-menu-item-labs"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Labs')
+                    }}
+                  >
                     <span className="labs-pill">
                       <Sparkles size={12} />
                       <span>labs</span>
                     </span>
                     <Check size={12} />
                   </button>
-                  <button type="button" className="profile-menu-item profile-menu-item-theme">
+                  <button
+                    type="button"
+                    className="profile-menu-item profile-menu-item-theme"
+                    onClick={() => {
+                      setIsProfileOpen(false)
+                      console.log('clicked Theme')
+                    }}
+                  >
                     <span>
                       <Moon size={13} />
                       Theme
@@ -738,23 +805,28 @@ export function HomePage({
                     className="profile-menu-item"
                     onClick={() => {
                       setIsProfileOpen(false)
-                      setActiveSection('home')
+                      console.log('clicked Shortcuts')
                     }}
                   >
                     Shortcuts
                   </button>
+                </div>
+                <div className="profile-menu-divider" />
+                <div className="profile-menu-block">
                   <button
                     type="button"
-                    className="profile-menu-item"
+                    className="profile-menu-item profile-menu-item-logout"
                     onClick={() => {
                       setIsProfileOpen(false)
                       if (onLogout) {
                         onLogout()
-                        return
+                      } else {
+                        localStorage.clear()
+                        navigate('/login')
                       }
-                      setActiveSection('home')
                     }}
                   >
+                    <LogOut size={14} />
                     Log out
                   </button>
                 </div>

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import './App.css'
 import { boardData } from './data/boardData'
 import { Board } from './components/Board'
@@ -50,6 +51,7 @@ function getStarterColumns() {
 }
 
 function App() {
+  const navigate = useNavigate()
   const [isBoardsLoading, setIsBoardsLoading] = useState(false)
   const [boardsError, setBoardsError] = useState('')
   const [boardId, setBoardId] = useState('')
@@ -396,95 +398,108 @@ function App() {
 
     localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(user))
     setCurrentUser(user)
+    navigate('/')
   }
 
   const onLogout = () => {
     clearStoredToken()
     localStorage.removeItem(AUTH_SESSION_KEY)
     setCurrentUser(null)
+    navigate('/login')
   }
 
-  if (!currentUser) {
-    return <AuthScreen onAuthenticate={onAuthenticate} />
-  }
+  const protectedContent = (() => {
+    if (activeView === 'home') {
+      return (
+        <HomePage
+          currentUser={currentUser}
+          recentBoards={recentBoards}
+          isLoadingBoards={isBoardsLoading}
+          boardsError={boardsError}
+          onOpenBoard={(board) => {
+            setBoardsError('')
+            setBoardId(board.id)
+            setColumns(board.columns ?? [])
+            setBoardTitle(board.title ?? 'Board')
+            setBoardBackgroundColor(board.color ?? 'violet')
+            setActiveView('board')
+          }}
+          onCreateBoard={onCreateBoard}
+          onOpenTemplates={() => setActiveView('templates')}
+          onLogout={onLogout}
+        />
+      )
+    }
 
-  if (activeView === 'home') {
+    if (activeView === 'templates') {
+      return <TemplateGallery onGoHome={() => setActiveView('home')} />
+    }
+
     return (
-      <HomePage
-        currentUser={currentUser}
-        recentBoards={recentBoards}
-        isLoadingBoards={isBoardsLoading}
-        boardsError={boardsError}
-        onOpenBoard={(board) => {
-          setBoardsError('')
-          setBoardId(board.id)
-          setColumns(board.columns ?? [])
-          setBoardTitle(board.title ?? 'Board')
-          setBoardBackgroundColor(board.color ?? 'violet')
-          setActiveView('board')
-        }}
-        onCreateBoard={onCreateBoard}
-        onOpenTemplates={() => setActiveView('templates')}
-        onLogout={onLogout}
-      />
+      <div
+        className="app-shell"
+        style={{ background: BOARD_BACKGROUND_STYLES[boardBackgroundColor] ?? BOARD_BACKGROUND_STYLES.violet }}
+      >
+        <Header
+          boardTitle={boardTitle}
+          onRenameBoard={onRenameBoard}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterLabels={filterLabels}
+          onFilterLabelsChange={setFilterLabels}
+          onGoHome={() => setActiveView('home')}
+        />
+        <Board
+          columns={filteredColumns}
+          totalCards={totalCards}
+          visibleCards={visibleCards}
+          isBoardFiltered={isBoardFiltered}
+          searchQuery={searchQuery}
+          filterLabels={filterLabels}
+          onMoveCard={onMoveCard}
+          onCardOpen={onOpenCard}
+          onAddCard={onOpenCreateCard}
+          onAddColumn={onAddColumn}
+          onDeleteColumn={onDeleteColumn}
+          onDeleteCard={onDeleteCard}
+        />
+        <CardDetailsModal
+          key={selectedCardView ? selectedCardView.card.id : 'no-card'}
+          selection={selectedCardView}
+          columns={columns}
+          onClose={onCloseCard}
+          onUpdateCard={onUpdateCard}
+          onArchiveCard={onArchiveCard}
+          onMoveCard={(cardId, fromColumnId, toColumnId) => {
+            setColumns((prev) => {
+              const target = prev.find((column) => column.id === toColumnId)
+              const insertIndex = target ? target.cards.length : 0
+              return moveCardToIndex(prev, cardId, fromColumnId, toColumnId, insertIndex)
+            })
+          }}
+        />
+        <CreateCardModal
+          key={createCardColumnId ?? 'closed'}
+          isOpen={Boolean(activeCreateColumn)}
+          columnTitle={activeCreateColumn ? `${activeCreateColumn.title}` : ''}
+          onClose={onCloseCreateCard}
+          onSubmit={(payload) => onAddCard(createCardColumnId, payload)}
+        />
+      </div>
     )
-  }
-
-  if (activeView === 'templates') {
-    return <TemplateGallery onGoHome={() => setActiveView('home')} />
-  }
+  })()
 
   return (
-    <div
-      className="app-shell"
-      style={{ background: BOARD_BACKGROUND_STYLES[boardBackgroundColor] ?? BOARD_BACKGROUND_STYLES.violet }}
-    >
-      <Header
-        boardTitle={boardTitle}
-        onRenameBoard={onRenameBoard}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filterLabels={filterLabels}
-        onFilterLabelsChange={setFilterLabels}
-        onGoHome={() => setActiveView('home')}
+    <Routes>
+      <Route
+        path="/login"
+        element={currentUser ? <Navigate to="/" replace /> : <AuthScreen onAuthenticate={onAuthenticate} />}
       />
-      <Board
-        columns={filteredColumns}
-        totalCards={totalCards}
-        visibleCards={visibleCards}
-        isBoardFiltered={isBoardFiltered}
-        searchQuery={searchQuery}
-        filterLabels={filterLabels}
-        onMoveCard={onMoveCard}
-        onCardOpen={onOpenCard}
-        onAddCard={onOpenCreateCard}
-        onAddColumn={onAddColumn}
-        onDeleteColumn={onDeleteColumn}
-        onDeleteCard={onDeleteCard}
+      <Route
+        path="/*"
+        element={currentUser ? protectedContent : <Navigate to="/login" replace />}
       />
-      <CardDetailsModal
-        key={selectedCardView ? selectedCardView.card.id : 'no-card'}
-        selection={selectedCardView}
-        columns={columns}
-        onClose={onCloseCard}
-        onUpdateCard={onUpdateCard}
-        onArchiveCard={onArchiveCard}
-        onMoveCard={(cardId, fromColumnId, toColumnId) => {
-          setColumns((prev) => {
-            const target = prev.find((column) => column.id === toColumnId)
-            const insertIndex = target ? target.cards.length : 0
-            return moveCardToIndex(prev, cardId, fromColumnId, toColumnId, insertIndex)
-          })
-        }}
-      />
-      <CreateCardModal
-        key={createCardColumnId ?? 'closed'}
-        isOpen={Boolean(activeCreateColumn)}
-        columnTitle={activeCreateColumn ? `${activeCreateColumn.title}` : ''}
-        onClose={onCloseCreateCard}
-        onSubmit={(payload) => onAddCard(createCardColumnId, payload)}
-      />
-    </div>
+    </Routes>
   )
 }
 
