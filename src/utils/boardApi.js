@@ -32,6 +32,13 @@ export async function getBoards() {
   return parseResponse(response)
 }
 
+export async function getBoard(boardId) {
+  const response = await fetch(`${BOARDS_ENDPOINT}/${boardId}`, {
+    headers: buildAuthHeaders(),
+  })
+  return parseResponse(response)
+}
+
 export async function createBoard(payload) {
   const response = await fetch(BOARDS_ENDPOINT, {
     method: 'POST',

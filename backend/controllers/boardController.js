@@ -35,6 +35,24 @@ async function createBoard(req, res) {
 }
 
 /**
+ * GET /api/boards/:id
+ * Return a single board owned by the logged-in user.
+ */
+async function getBoardById(req, res) {
+  try {
+    const board = await Board.findOne({ _id: req.params.id, userId: req.user.userId });
+
+    if (!board) {
+      return res.status(404).json({ message: 'Board not found.' });
+    }
+
+    return res.json(board);
+  } catch (error) {
+    return res.status(500).json({ message: error.message || 'Failed to fetch board.' });
+  }
+}
+
+/**
  * PUT /api/boards/:id
  * Update a board only if it belongs to the logged-in user.
  */
@@ -87,6 +105,7 @@ async function deleteBoard(req, res) {
 
 module.exports = {
   getBoards,
+  getBoardById,
   createBoard,
   updateBoard,
   deleteBoard,

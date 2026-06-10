@@ -57,7 +57,22 @@ export function Header({
     <header className="board-header">
       <div className="header-left">
         <div className="app-brand">
-          <span className="brand-logo">T</span>
+          <span className="brand-logo" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M5 3C3.89543 3 3 3.89543 3 5V19C3 20.1045 3.89543 21 5 21H19C20.1045 21 21 20.1045 21 19V5C21 3.89543 20.1045 3 19 3H5Z"
+                fill="currentColor"
+              />
+              <path
+                d="M10 7C10.5523 7 11 7.44772 11 8V16C11 16.5523 10.5523 17 10 17H7C6.44772 17 6 16.5523 6 16V8C6 7.44772 6.44772 7 7 7H10Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M17 7C17.5523 7 18 7.44772 18 8V13C18 13.5523 17.5523 14 17 14H14C13.4477 14 13 13.5523 13 13V8C13 7.44772 13.4477 7 14 7H17Z"
+                fill="#ffffff"
+              />
+            </svg>
+          </span>
           {!titleOpen ? (
             <button
               type="button"

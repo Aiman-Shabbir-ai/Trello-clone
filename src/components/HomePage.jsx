@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   BadgeHelp,
   Bell,
@@ -16,7 +16,6 @@ import {
   LayoutGrid,
   LayoutTemplate,
   Lock,
-  LogOut,
   Pencil,
   Settings,
   Plus,
@@ -35,6 +34,7 @@ import { AppStoreModal } from './AppStoreModal'
 import { AppSwitcherSidebar } from './AppSwitcherSidebar'
 import { WorkspaceMembers } from './WorkspaceMembers'
 import { WorkspaceSettings } from './WorkspaceSettings'
+import { BoardsDashboard } from './BoardsDashboard'
 
 const RECENT_BOARDS = [
   { id: 'b1', title: 'ParentsPlus', workspace: 'Trello Workspace', color: 'sunset' },
@@ -377,14 +377,23 @@ export function HomePage({
   boardsError = '',
   onOpenBoard,
   onCreateBoard,
-  onOpenTemplates,
   onLogout,
 }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isAppSwitcherOpen, setIsAppSwitcherOpen] = useState(false)
   const [isAppStoreOpen, setIsAppStoreOpen] = useState(false)
-  const [activeSection, setActiveSection] = useState('home')
+
+  const activeSection = useMemo(() => {
+    const { pathname } = location
+    if (pathname === '/boards') return 'boards'
+    if (pathname === '/workspace') return 'workspace'
+    if (pathname === '/workspace/members') return 'members'
+    if (pathname === '/workspace/settings') return 'settings'
+    if (pathname === '/search') return 'search'
+    return 'home'
+  }, [location.pathname])
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchTab, setSearchTab] = useState('trello')
@@ -498,11 +507,26 @@ export function HomePage({
   const handleOpenAdvancedSearch = () => {
     setIsSearchOpen(false)
     setSearchTab('trello')
-    setActiveSection('search')
+    navigate('/search')
   }
+
+  const sidebarLinkClass = ({ isActive }) => `sidebar-item${isActive ? ' active' : ''}`
+  const workspaceLinkClass = (section) => ({ isActive }) =>
+    `workspace-link${isActive || (section === 'boards' && activeSection === 'workspace') ? ' active' : ''}`
 
   const handleUpgradeClick = () => {
     window.open('https://trello.com/pricing', '_blank', 'noopener,noreferrer')
+  }
+
+  const handleLogout = () => {
+    setIsProfileOpen(false)
+    if (onLogout) {
+      onLogout()
+      return
+    }
+    localStorage.removeItem('trello-clone-token')
+    localStorage.removeItem('trello-clone-session-user')
+    navigate('/login')
   }
 
   return (
@@ -512,11 +536,11 @@ export function HomePage({
           <div className="topbar-popover-wrap app-switcher-wrap" ref={appSwitcherRef}>
             <button
               type="button"
-              className="top-icon-btn"
+              className="top-icon-btn top-icon-btn-app-launcher"
               aria-label="Apps"
               onClick={() => setIsAppSwitcherOpen((open) => !open)}
             >
-              <LayoutGrid size={15} />
+              <LayoutGrid size={20} strokeWidth={2} />
             </button>
             {isAppSwitcherOpen ? (
               <AppSwitcherSidebar
@@ -527,9 +551,22 @@ export function HomePage({
               />
             ) : null}
           </div>
-          <div className="trello-mark" aria-hidden="true">
-            T
-          </div>
+          <span className="trello-logo" aria-hidden="true">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M5 3C3.89543 3 3 3.89543 3 5V19C3 20.1045 3.89543 21 5 21H19C20.1045 21 21 20.1045 21 19V5C21 3.89543 20.1045 3 19 3H5Z"
+                fill="currentColor"
+              />
+              <path
+                d="M10 7C10.5523 7 11 7.44772 11 8V16C11 16.5523 10.5523 17 10 17H7C6.44772 17 6 16.5523 6 16V8C6 7.44772 6.44772 7 7 7H10Z"
+                fill="#ffffff"
+              />
+              <path
+                d="M17 7C17.5523 7 18 7.44772 18 8V13C18 13.5523 17.5523 14 17 14H14C13.4477 14 13 13.5523 13 13V8C13 7.44772 13.4477 7 14 7H17Z"
+                fill="#ffffff"
+              />
+            </svg>
+          </span>
           <div className="home-search" ref={searchWrapRef}>
             <Search size={14} />
             <input
@@ -812,21 +849,8 @@ export function HomePage({
                   </button>
                 </div>
                 <div className="profile-menu-divider" />
-                <div className="profile-menu-block">
-                  <button
-                    type="button"
-                    className="profile-menu-item profile-menu-item-logout"
-                    onClick={() => {
-                      setIsProfileOpen(false)
-                      if (onLogout) {
-                        onLogout()
-                      } else {
-                        localStorage.clear()
-                        navigate('/login')
-                      }
-                    }}
-                  >
-                    <LogOut size={14} />
+                <div className="profile-menu-block profile-menu-block-logout">
+                  <button type="button" className="profile-menu-item" onClick={handleLogout}>
                     Log out
                   </button>
                 </div>
@@ -838,78 +862,53 @@ export function HomePage({
 
       <div className="home-layout">
         <aside className="home-sidebar">
-          <button
-            type="button"
-            className={`sidebar-item ${activeSection === 'boards' ? 'active' : ''}`}
-            onClick={() => setActiveSection('boards')}
-          >
+          <NavLink to="/boards" className={sidebarLinkClass}>
             <Bookmark size={14} />
             Boards
-          </button>
-          <button
-            type="button"
-            className={`sidebar-item ${activeSection === 'templates' ? 'active' : ''}`}
-            onClick={() => {
-              if (onOpenTemplates) {
-                onOpenTemplates()
-                return
-              }
-              setActiveSection('templates')
-            }}
-          >
+          </NavLink>
+          <NavLink to="/templates" className={sidebarLinkClass}>
             <Compass size={14} />
             Templates
-          </button>
-          <button
-            type="button"
-            className={`sidebar-item ${activeSection === 'home' ? 'active' : ''}`}
-            onClick={() => setActiveSection('home')}
-          >
+          </NavLink>
+          <NavLink to="/home" className={sidebarLinkClass}>
             <Home size={14} />
             Home
-          </button>
+          </NavLink>
 
           <div className="workspace-block">
             <p>Workspaces</p>
-            <button
-              type="button"
-              className={`workspace-item ${activeSection === 'workspace' ? 'active' : ''}`}
-              onClick={() => {
-                setActiveSection('workspace')
-                setIsWorkspaceOpen(true)
-              }}
+            <NavLink
+              to="/workspace"
+              className={({ isActive }) => `workspace-item${isActive ? ' active' : ''}`}
+              onClick={() => setIsWorkspaceOpen(true)}
               aria-expanded={isWorkspaceOpen}
             >
               <span className="workspace-avatar">T</span>
               Trello Workspace
               <ChevronDown size={14} />
-            </button>
+            </NavLink>
             {isWorkspaceOpen && (
               <div className="workspace-panel">
-                <button
-                  type="button"
-                  className={`workspace-link ${activeSection === 'boards' || activeSection === 'workspace' ? 'active' : ''}`}
-                  onClick={() => setActiveSection('boards')}
-                >
+                <NavLink to="/boards" className={workspaceLinkClass('boards')} onClick={() => setIsWorkspaceOpen(true)}>
                   <SquareKanban size={14} />
                   Boards
-                </button>
-                <button
-                  type="button"
-                  className={`workspace-link ${activeSection === 'members' ? 'active' : ''}`}
-                  onClick={() => setActiveSection('members')}
+                </NavLink>
+                <NavLink
+                  to="/workspace/members"
+                  className={workspaceLinkClass('members')}
+                  onClick={() => setIsWorkspaceOpen(true)}
                 >
                   <Users size={14} />
                   Members
-                </button>
-                <button
-                  type="button"
-                  className={`workspace-link ${activeSection === 'settings' ? 'active' : ''}`}
-                  onClick={() => setActiveSection('settings')}
+                </NavLink>
+                <NavLink
+                  to="/workspace/settings"
+                  className={workspaceLinkClass('settings')}
+                  onClick={() => setIsWorkspaceOpen(true)}
                 >
                   <Settings size={14} />
                   Settings
-                </button>
+                </NavLink>
                 <div className="workspace-upgrade">
                   <strong>Upgrade this Workspace</strong>
                   <p>
@@ -922,56 +921,36 @@ export function HomePage({
         </aside>
 
         <main className="workspace-content" ref={contentRef}>
-          {activeSection === 'workspace' || activeSection === 'boards' ? (
-            <>
-              <section className="workspace-header">
-                <div className="workspace-badge">T</div>
-                <div>
-                  <h2>
-                    Trello Workspace <Pencil size={14} />
-                  </h2>
-                  <p>
-                    <Lock size={12} /> Private
-                  </p>
-                </div>
-              </section>
-
-              <PopularTemplatesPanel
-                selectedCategory={selectedTemplateCategory}
-                onSelectCategory={setSelectedTemplateCategory}
-                visibleTemplates={visibleTemplates}
-                isDismissed={templatesPromoDismissed}
-                onDismiss={() => setTemplatesPromoDismissed(true)}
-                templateIdPrefix="workspace"
-                onTemplateSelect={handleTemplateSelect}
-              />
-
-              <section className="boards-section">
-                <h3>
-                  <UserRound size={16} />
-                  Your boards
-                </h3>
-                {isLoadingBoards ? <p>Loading boards...</p> : null}
-                {boardsError ? <p className="field-error">{boardsError}</p> : null}
-                <div className="board-grid">
-                  {boardsToShow.map((board) => (
-                    <button
-                      key={`workspace-${board.id}-main`}
-                      type="button"
-                      className="board-tile"
-                      onClick={() => onOpenBoard(board)}
-                    >
-                      <span className={`board-tile-cover ${board.color}`} />
-                      <strong>{board.title}</strong>
-                    </button>
-                  ))}
-                  <button type="button" className="board-tile create-tile" onClick={() => setIsCreateModalOpen(true)}>
-                    <span>Create new board</span>
-                    <small>7 remaining</small>
-                  </button>
-                </div>
-              </section>
-            </>
+          {activeSection === 'boards' ? (
+            <BoardsDashboard
+              view="boards"
+              boards={boardsToShow}
+              isLoadingBoards={isLoadingBoards}
+              boardsError={boardsError}
+              templates={visibleTemplates}
+              templateCategories={TEMPLATE_CATEGORY_LIST}
+              selectedTemplateCategory={selectedTemplateCategory}
+              onSelectTemplateCategory={setSelectedTemplateCategory}
+              onTemplateSelect={handleTemplateSelect}
+              onOpenBoard={onOpenBoard}
+              onCreateBoard={() => setIsCreateModalOpen(true)}
+              onUpgrade={handleUpgradeClick}
+            />
+          ) : activeSection === 'workspace' ? (
+            <BoardsDashboard
+              view="workspace"
+              boards={boardsToShow}
+              isLoadingBoards={isLoadingBoards}
+              boardsError={boardsError}
+              templates={visibleTemplates}
+              templateCategories={TEMPLATE_CATEGORY_LIST}
+              selectedTemplateCategory={selectedTemplateCategory}
+              onSelectTemplateCategory={setSelectedTemplateCategory}
+              onTemplateSelect={handleTemplateSelect}
+              onOpenBoard={onOpenBoard}
+              onCreateBoard={() => setIsCreateModalOpen(true)}
+              onUpgrade={handleUpgradeClick}
+            />
           ) : activeSection === 'members' ? (
             <WorkspaceMembers currentUser={currentUser} />
           ) : activeSection === 'settings' ? (

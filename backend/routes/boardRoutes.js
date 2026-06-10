@@ -2,6 +2,7 @@ const express = require('express');
 const authMiddleware = require('../middleware/authMiddleware');
 const {
   getBoards,
+  getBoardById,
   createBoard,
   updateBoard,
   deleteBoard,
@@ -13,6 +14,7 @@ const router = express.Router();
 router.use(authMiddleware);
 
 router.get('/', getBoards);
+router.get('/:id', getBoardById);
 router.post('/', createBoard);
 router.put('/:id', updateBoard);
 router.delete('/:id', deleteBoard);
