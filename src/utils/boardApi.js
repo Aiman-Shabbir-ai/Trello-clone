@@ -1,6 +1,6 @@
 import { clearStoredToken, getStoredToken } from './authApi'
+import { API_BASE_URL } from './apiConfig'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000'
 const BOARDS_ENDPOINT = `${API_BASE_URL}/api/boards`
 
 function buildAuthHeaders(extraHeaders = {}) {

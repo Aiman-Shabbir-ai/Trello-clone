@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'https://trello-clone-backend-six.vercel.app/'
+import { API_BASE_URL } from './apiConfig'
+
 const AUTH_ENDPOINT = `${API_BASE_URL}/api/auth`
 const TOKEN_STORAGE_KEY = 'trello-clone-token'
 
